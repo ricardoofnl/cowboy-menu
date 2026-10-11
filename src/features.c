@@ -468,11 +468,15 @@ static void give_all_ammo(void) {
   int ped = cur_ped(); if (!ped) return;
   for (unsigned i = 0; i < NWEAPONS; i++) {
     uint32_t w = WEAPONS[i];
+    // own the weapon first - SET_PED_AMMO / GET_PED_AMMO_TYPE_FROM_WEAPON are no-ops on an unowned
+    // weapon (type resolves to 0), so the old refill never applied. give_one_weapon re-tops ammo.
+    give_one_weapon(ped, w, 500, 0);
     nat_call(g_base, OFF__ENABLE_ALL_SPECIAL_AMMO_FOR_PED, (uint64_t[]){(uint32_t)ped, w}, 2);
     uint32_t at = (uint32_t)nat_call(g_base, OFF_GET_PED_AMMO_TYPE_FROM_WEAPON, (uint64_t[]){(uint32_t)ped, w}, 2);
-    if (at) nat_call(g_base, OFF_SET_PED_AMMO_BY_TYPE, (uint64_t[]){(uint32_t)ped, at, 500}, 3);
-    nat_call(g_base, OFF_SET_PED_AMMO, (uint64_t[]){(uint32_t)ped, w, 500}, 3);   // 3-arg, old n=4 was wrong
+    if (at) nat_call(g_base, OFF_SET_PED_AMMO_BY_TYPE, (uint64_t[]){(uint32_t)ped, at, 500}, 3); // shared pool
+    nat_call(g_base, OFF_SET_PED_AMMO, (uint64_t[]){(uint32_t)ped, w, 500}, 3);                  // per-weapon
   }
+  ui_notify("ammo refilled");
 }
 
 // give the whole arsenal, then show the long guns on the horse saddle holsters
