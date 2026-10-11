@@ -223,19 +223,22 @@ static void ui_draw(void) {
         const char *hex = hot ? "1A1206" : "D8C9A8";
         float ty = cy - 0.012f;
         ui_item *it = &s_items[i];
-        ui_draw_text(it->label, textL + dx, ty, 22, "body", hex, "LEFT");
-        if (it->kind == UI_TOGGLE) {
-            ui_checkbox(textR + dx, cy, it->state && *it->state);
-        } else if (it->kind == UI_SUBMENU) {
-            ui_draw_text(">", textL + dx + 0.185f, ty, 22, "body", hex, "LEFT");
-        } else if (it->kind == UI_SCROLL_INT) {
-            char vb[32]; snprintf(vb, sizeof vb, "< %d >", it->state ? *it->state : 0);
-            ui_draw_text(vb, textL + dx + 0.120f, ty, 22, "body", hex, "LEFT");
+        // scrollers: draw the value INTO the label text (one left-aligned string) so it always
+        // shows next to the label; X or left/right change it.
+        if (it->kind == UI_SCROLL_INT) {
+            char lb[96]; snprintf(lb, sizeof lb, "%s:  < %d >", it->label, it->state ? *it->state : 0);
+            ui_draw_text(lb, textL + dx, ty, 22, "body", hex, "LEFT");
         } else if (it->kind == UI_SCROLL_OPT) {
             const char *v = (it->state && it->opts && *it->state >= 0 && *it->state < it->nopts)
                             ? it->opts[*it->state] : "";
-            char vb[48]; snprintf(vb, sizeof vb, "< %s >", v);
-            ui_draw_text(vb, textL + dx + 0.100f, ty, 22, "body", hex, "LEFT");
+            char lb[96]; snprintf(lb, sizeof lb, "%s:  < %s >", it->label, v);
+            ui_draw_text(lb, textL + dx, ty, 22, "body", hex, "LEFT");
+        } else {
+            ui_draw_text(it->label, textL + dx, ty, 22, "body", hex, "LEFT");
+            if (it->kind == UI_TOGGLE)
+                ui_checkbox(textR + dx, cy, it->state && *it->state);
+            else if (it->kind == UI_SUBMENU)
+                ui_draw_text(">", textL + dx + 0.185f, ty, 22, "body", hex, "LEFT");
         }
     }
 
@@ -333,6 +336,12 @@ void ui_tick(void) {
                 ui_sound("SELECT");
                 return;         // child page builds + draws next frame
             }
+        } else if (it->kind == UI_SCROLL_INT) {
+            if (it->state) { *it->state += it->step; if (*it->state > it->hi) *it->state = it->lo; }
+            ui_sound("SELECT");
+        } else if (it->kind == UI_SCROLL_OPT) {
+            if (it->state && it->nopts > 0) *it->state = (*it->state + 1) % it->nopts;
+            ui_sound("SELECT");
         }
     }
 
