@@ -9,6 +9,8 @@ typedef struct {
   int infinite_ammo, one_hit_kill, teleport_gun, rapid_fire, perfect_accuracy, explosive_bullet;
   // horse toggles
   int horse_unlimited_stamina, horse_god, horse_invisible, horse_super_run;
+  // world
+  int freeze_time;
 } FeatureState;
 
 extern FeatureState g_feat;

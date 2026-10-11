@@ -68,6 +68,29 @@ static const uint32_t LONGARMS[] = {
 };
 #define NLONGARMS (sizeof(LONGARMS) / sizeof(LONGARMS[0]))
 
+// money amounts in dollars (the game stores cents); scroller picks one
+static const int MONEY_AMOUNTS[] = { 10, 50, 100, 500, 1000, 5000, 10000, 50000 };
+static const char *const MONEY_LABELS[] = { "$10","$50","$100","$500","$1000","$5000","$10000","$50000" };
+#define NMONEY (sizeof(MONEY_AMOUNTS) / sizeof(MONEY_AMOUNTS[0]))
+
+// weather types (joaat of the lowercased name)
+static const uint32_t WEATHER_HASHES[] = {
+  0x614A1F91u,0x30FDAF5Cu,0xBB898D2Du,0x19D4F1D9u,0x995C7F44u,0x54A69840u,0xB677829Fu,
+  0x7C1C4A13u,0x75A9E268u,0xEFB6EFF6u,0x23FB812Bu,0x27EA2814u,0xD61BDE01u,0x5974E8E5u,0xB17F6111u,
+};
+static const char *const WEATHER_NAMES[] = {
+  "Sunny","Clouds","Overcast","Dark","Drizzle","Rain","Thunder",
+  "Storm","Hail","Snow","Snow Light","Blizzard","Fog","Misty","Sandstorm",
+};
+#define NWEATHER (sizeof(WEATHER_HASHES) / sizeof(WEATHER_HASHES[0]))
+
+// horse tack components (real joaat from rdr3 scripts)
+static const uint32_t TACK[] = { 0xC10B5450u, 0x587DD49Fu, 0xC6C381F5u, 0x5277E9BAu, 0x508B80B9u, 0x9FD99D7Du };
+#define NTACK (sizeof(TACK) / sizeof(TACK[0]))
+
+// scroller state for the money / weather / time menus
+static int s_money_idx = 2, s_weather_idx = 0, s_hour = 12, s_minute = 0;
+
 // forward decls
 static void player_page(void);
 static void weapon_page(void);
@@ -83,6 +106,12 @@ static void take_all_weapons(void);
 static void self_kill(void);
 static void bonding_max(void);
 static void horse_shop(void);
+static void money_page(void);
+static void worldtime_page(void);
+static void money_add(void);
+static void money_remove(void);
+static void apply_weather(void);
+static void apply_time(void);
 
 static int cur_player(void) { return (int)nat_call(g_base, OFF_PLAYER_ID, 0, 0); }
 static int cur_ped(void) {
@@ -97,6 +126,8 @@ void features_build_root(void) {
   ui_submenu("Player", player_page);
   ui_submenu("Weapon Options", weapon_page);
   ui_submenu("Horse Options", horse_page);
+  ui_submenu("Money", money_page);
+  ui_submenu("Weather & Time", worldtime_page);
 }
 
 static void player_page(void) {
@@ -140,7 +171,7 @@ static void horse_page(void) {
   ui_toggle("Invisibility", &g_feat.horse_invisible);
   ui_toggle("Super Run", &g_feat.horse_super_run);
   ui_action("Bonding Level Max", bonding_max);
-  ui_action("Horse Shop", horse_shop);
+  ui_action("Upgrade Saddle & Tack", horse_shop);
 }
 // ---- per-frame apply ----
 
@@ -347,6 +378,10 @@ void features_apply_all(uint64_t base) {
                      1, 1, 1, 1, 0, 1}, 14);
   }
 
+  // freeze time - pause/unpause the in-game clock on the toggle edge
+  if (g_feat.freeze_time && !prev.freeze_time) nat_call(base, OFF_PAUSE_CLOCK, (uint64_t[]){1, 0}, 2);
+  else if (!g_feat.freeze_time && prev.freeze_time) nat_call(base, OFF_PAUSE_CLOCK, (uint64_t[]){0, 0}, 2);
+
   prev = g_feat;
 }
 // ---- one-shot actions ----
@@ -429,13 +464,71 @@ static void self_kill(void) {
 
 static void bonding_max(void) {
   int ped = cur_ped(); if (!ped) return;
-  if (!(int)nat_call(g_base, OFF_IS_PED_ON_MOUNT, (uint64_t[]){(uint32_t)ped}, 1)) return;
-  int mount = (int)nat_call(g_base, OFF_GET_MOUNT, (uint64_t[]){(uint32_t)ped}, 1);
-  if (mount) nat_call(g_base, OFF__SET_MOUNT_BONDING_LEVEL, (uint64_t[]){(uint32_t)mount, 4}, 2);
+  int mount = 0;
+  if ((int)nat_call(g_base, OFF_IS_PED_ON_MOUNT, (uint64_t[]){(uint32_t)ped}, 1))
+    mount = (int)nat_call(g_base, OFF_GET_MOUNT, (uint64_t[]){(uint32_t)ped}, 1);
+  if (!mount) mount = (int)nat_call(g_base, OFF__GET_SADDLE_HORSE_FOR_PLAYER, (uint64_t[]){(uint32_t)cur_player()}, 1);
+  if (!mount) { ui_notify("no horse found"); return; }
+  // the runtime bonding native alone snaps back; also write the backing attribute. PA_BONDING is
+  // attribute index 7, range 0-4 (4 = max).
+  nat_call(g_base, OFF_SET_ATTRIBUTE_BASE_RANK, (uint64_t[]){(uint32_t)mount, 7, 4}, 3);
+  nat_call(g_base, OFF__SET_MOUNT_BONDING_LEVEL, (uint64_t[]){(uint32_t)mount, 4}, 2);
+  ui_notify("bond maxed");
 }
 
 static void horse_shop(void) {
-  // TODO need tack hashes - real saddle/tack joaat component hashes are not in the native db.
-  // once sourced: resolve mount, then _APPLY_SHOP_ITEM_TO_PED(mount, tackHash, 1, 0, 0),
-  // commit with _REFRESH_META_PED_SHOP_ITEMS + _UPDATE_PED_VARIATION + _SET_ACTIVE_META_PED_COMPONENTS_UPDATED.
+  int ped = cur_ped(); if (!ped) return;
+  int mount = 0;
+  if ((int)nat_call(g_base, OFF_IS_PED_ON_MOUNT, (uint64_t[]){(uint32_t)ped}, 1))
+    mount = (int)nat_call(g_base, OFF_GET_MOUNT, (uint64_t[]){(uint32_t)ped}, 1);
+  if (!mount) mount = (int)nat_call(g_base, OFF__GET_SADDLE_HORSE_FOR_PLAYER, (uint64_t[]){(uint32_t)cur_player()}, 1);
+  if (!mount) { ui_notify("no horse found"); return; }
+  nat_call(g_base, OFF__REFRESH_META_PED_SHOP_ITEMS, (uint64_t[]){(uint32_t)mount, 0}, 2);
+  for (unsigned i = 0; i < NTACK; i++) {
+    nat_call(g_base, OFF__APPLY_SHOP_ITEM_TO_PED, (uint64_t[]){(uint32_t)mount, TACK[i], 0, 0, 0}, 5); // sp
+    nat_call(g_base, OFF__APPLY_SHOP_ITEM_TO_PED, (uint64_t[]){(uint32_t)mount, TACK[i], 0, 1, 0}, 5); // mp
+  }
+  nat_call(g_base, OFF__UPDATE_PED_VARIATION, (uint64_t[]){(uint32_t)mount, 0, 1, 1, 1, 0}, 6);
+  nat_call(g_base, OFF__SET_ACTIVE_META_PED_COMPONENTS_UPDATED, (uint64_t[]){(uint32_t)mount, 0}, 2);
+  ui_notify("tack applied");
+}
+
+// ---- money / weather / time ----
+static void money_page(void) {
+  ui_title("Money");
+  ui_scroll_opt("Amount", &s_money_idx, MONEY_LABELS, (int)NMONEY);
+  ui_action("Add Money", money_add);
+  ui_action("Remove Money", money_remove);
+}
+static void money_add(void) {
+  int cents = MONEY_AMOUNTS[s_money_idx] * 100;
+  nat_call(g_base, OFF__MONEY_INCREMENT_CASH_BALANCE, (uint64_t[]){(uint32_t)cents, ADD_REASON_DEFAULT}, 2);
+  ui_notify("money added");
+}
+static void money_remove(void) {
+  int cents = MONEY_AMOUNTS[s_money_idx] * 100;
+  int bal = (int)nat_call(g_base, OFF__MONEY_GET_CASH_BALANCE, 0, 0); // balance in cents
+  if (cents > bal) cents = bal;                                       // clamp at 0
+  if (cents > 0) nat_call(g_base, OFF__MONEY_DECREMENT_CASH_BALANCE, (uint64_t[]){(uint32_t)cents}, 1);
+  ui_notify("money removed");
+}
+
+static void worldtime_page(void) {
+  ui_title("Weather & Time");
+  ui_scroll_opt("Weather", &s_weather_idx, WEATHER_NAMES, (int)NWEATHER);
+  ui_action("Apply Weather", apply_weather);
+  ui_scroll_int("Hour", &s_hour, 0, 23, 1);
+  ui_scroll_int("Minute", &s_minute, 0, 59, 5);
+  ui_action("Apply Time", apply_time);
+  ui_toggle("Freeze Time", &g_feat.freeze_time);
+}
+static void apply_weather(void) {
+  uint32_t w = WEATHER_HASHES[s_weather_idx];
+  nat_call(g_base, OFF_SET_CURR_WEATHER_STATE, (uint64_t[]){w, w, fu(0.0f), 1}, 4); // instant snap
+  nat_call(g_base, OFF_SET_WEATHER_TYPE, (uint64_t[]){w, 1, 1, 1, fu(0.0f), 0}, 6); // force it
+  ui_notify("weather set");
+}
+static void apply_time(void) {
+  nat_call(g_base, OFF_SET_CLOCK_TIME, (uint64_t[]){(uint32_t)s_hour, (uint32_t)s_minute, 0}, 3);
+  ui_notify("time set");
 }
