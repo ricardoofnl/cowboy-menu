@@ -206,13 +206,16 @@ void features_apply_all(uint64_t base) {
   // player ignore
   if (g_feat.player_ignore)     nat_call(base, OFF_SET_EVERYONE_IGNORE_PLAYER, (uint64_t[]){(uint32_t)player, 1}, 2);
   else if (prev.player_ignore)  nat_call(base, OFF_SET_EVERYONE_IGNORE_PLAYER, (uint64_t[]){(uint32_t)player, 0}, 2);
-  // infinite ammo
-  if (g_feat.infinite_ammo) {
-    nat_call(base, OFF_SET_PED_INFINITE_AMMO, (uint64_t[]){(uint32_t)ped, 1, 0}, 3);
+  // infinite ammo - clip native stops reloads; reserve ammo is PER-WEAPON (hash arg), so loop
+  // over the weapon set. the old call passed weaponHash 0 which targets nothing, so reserve kept draining.
+  if (g_feat.infinite_ammo && ped) {
     nat_call(base, OFF__SET_PED_INFINITE_AMMO_CLIP, (uint64_t[]){(uint32_t)ped, 1}, 2);
-  } else if (prev.infinite_ammo) {
-    nat_call(base, OFF_SET_PED_INFINITE_AMMO, (uint64_t[]){(uint32_t)ped, 0, 0}, 3);
+    for (unsigned i = 0; i < NWEAPONS; i++)
+      nat_call(base, OFF_SET_PED_INFINITE_AMMO, (uint64_t[]){(uint32_t)ped, 1, WEAPONS[i]}, 3);
+  } else if (prev.infinite_ammo && ped) {
     nat_call(base, OFF__SET_PED_INFINITE_AMMO_CLIP, (uint64_t[]){(uint32_t)ped, 0}, 2);
+    for (unsigned i = 0; i < NWEAPONS; i++)
+      nat_call(base, OFF_SET_PED_INFINITE_AMMO, (uint64_t[]){(uint32_t)ped, 0, WEAPONS[i]}, 3);
   }
 
   // one hit kill - damage modifier (simpler than looping instant-kill groups)
@@ -233,25 +236,44 @@ void features_apply_all(uint64_t base) {
     nat_call(base, OFF__SET_PLAYER_TOTAL_ACCURACY_MODIFIER, (uint64_t[]){(uint32_t)player, fu(1.0f)}, 2);
   }
 
-  // explosive bullet - experimental; may double-fire, no reliable per-shot clear. VERIFY
-  if (g_feat.explosive_bullet && ped) {
-    ScrVec3 c; memset(&c, 0, sizeof c);
-    int hit = (int)nat_call(base, OFF_GET_PED_LAST_WEAPON_IMPACT_COORD,
-                            (uint64_t[]){(uint32_t)ped, (uint64_t)(uintptr_t)&c}, 2);
-    if (hit) {
-      nat_call(base, OFF_ADD_OWNED_EXPLOSION,
-        (uint64_t[]){(uint32_t)ped, fu(c.x), fu(c.y), fu(c.z), 4 /*type VERIFY*/, fu(1.0f), 1, 0, fu(1.0f)}, 9);
+  // explosive bullet - detonate at each NEW shot impact. the last-impact coord persists, so
+  // dedupe or it re-blasts every frame at the same spot. type 25 = EXP_TAG_DYNAMITE (4 was molotov).
+  {
+    static float eb_lx, eb_ly, eb_lz; static int eb_primed;
+    if (g_feat.explosive_bullet && ped) {
+      if (!prev.explosive_bullet) eb_primed = 0;   // fresh enable: baseline off a stale impact
+      ScrVec3 c; memset(&c, 0, sizeof c);
+      int hit = (int)nat_call(base, OFF_GET_PED_LAST_WEAPON_IMPACT_COORD,
+                              (uint64_t[]){(uint32_t)ped, (uint64_t)(uintptr_t)&c}, 2);
+      if (hit && (!eb_primed || c.x != eb_lx || c.y != eb_ly || c.z != eb_lz)) {
+        if (eb_primed)
+          nat_call(base, OFF_ADD_OWNED_EXPLOSION,
+            (uint64_t[]){(uint32_t)ped, fu(c.x), fu(c.y), fu(c.z), 25, fu(1.0f), 1, 0, fu(1.0f)}, 9);
+        eb_lx = c.x; eb_ly = c.y; eb_lz = c.z; eb_primed = 1;
+      }
+    } else {
+      eb_primed = 0;
     }
   }
 
-  // teleport gun - jump the player to wherever the last shot hit. VERIFY set_entity_coords arg form
-  if (g_feat.teleport_gun && ped) {
-    ScrVec3 c; memset(&c, 0, sizeof c);
-    int hit = (int)nat_call(base, OFF_GET_PED_LAST_WEAPON_IMPACT_COORD,
-                            (uint64_t[]){(uint32_t)ped, (uint64_t)(uintptr_t)&c}, 2);
-    if (hit)
-      nat_call(base, OFF_SET_ENTITY_COORDS,
-        (uint64_t[]){(uint32_t)ped, fu(c.x), fu(c.y), fu(c.z), 0, 0, 1, 0}, 8);
+  // teleport gun - jump to each NEW shot impact. the last-impact coord persists, so without a
+  // dedupe it yanks you back every frame; +1z keeps you from clipping into the ground.
+  {
+    static float tg_lx, tg_ly, tg_lz; static int tg_primed;
+    if (g_feat.teleport_gun && ped) {
+      if (!prev.teleport_gun) tg_primed = 0;   // fresh enable: baseline, don't warp on a stale impact
+      ScrVec3 c; memset(&c, 0, sizeof c);
+      int hit = (int)nat_call(base, OFF_GET_PED_LAST_WEAPON_IMPACT_COORD,
+                              (uint64_t[]){(uint32_t)ped, (uint64_t)(uintptr_t)&c}, 2);
+      if (hit && (!tg_primed || c.x != tg_lx || c.y != tg_ly || c.z != tg_lz)) {
+        if (tg_primed)
+          nat_call(base, OFF_SET_ENTITY_COORDS,
+            (uint64_t[]){(uint32_t)ped, fu(c.x), fu(c.y), fu(c.z + 1.0f), 0, 0, 0, 0}, 8);
+        tg_lx = c.x; tg_ly = c.y; tg_lz = c.z; tg_primed = 1;
+      }
+    } else {
+      tg_primed = 0;
+    }
   }
 
   // ---- horse: resolve the mount, apply to it ----
