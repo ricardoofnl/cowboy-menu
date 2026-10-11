@@ -111,6 +111,7 @@ static void weapon_page(void) {
   ui_action("Take All Weapons", take_all_weapons);
   ui_toggle("Infinite Ammo", &g_feat.infinite_ammo);
   ui_toggle("One Hit Kill", &g_feat.one_hit_kill);
+  ui_toggle("Teleport Gun", &g_feat.teleport_gun);
   ui_toggle("Rapid Fire (exp)", &g_feat.rapid_fire);
   ui_toggle("Perfect Accuracy (exp)", &g_feat.perfect_accuracy);
   ui_toggle("Explosive Bullet (exp)", &g_feat.explosive_bullet);
@@ -237,6 +238,16 @@ void features_apply_all(uint64_t base) {
       nat_call(base, OFF_ADD_OWNED_EXPLOSION,
         (uint64_t[]){(uint32_t)ped, fu(c.x), fu(c.y), fu(c.z), 4 /*type VERIFY*/, fu(1.0f), 1, 0, fu(1.0f)}, 9);
     }
+  }
+
+  // teleport gun - jump the player to wherever the last shot hit. VERIFY set_entity_coords arg form
+  if (g_feat.teleport_gun && ped) {
+    ScrVec3 c; memset(&c, 0, sizeof c);
+    int hit = (int)nat_call(base, OFF_GET_PED_LAST_WEAPON_IMPACT_COORD,
+                            (uint64_t[]){(uint32_t)ped, (uint64_t)(uintptr_t)&c}, 2);
+    if (hit)
+      nat_call(base, OFF_SET_ENTITY_COORDS,
+        (uint64_t[]){(uint32_t)ped, fu(c.x), fu(c.y), fu(c.z), 0, 0, 1, 0}, 8);
   }
 
   // ---- horse: resolve the mount, apply to it ----

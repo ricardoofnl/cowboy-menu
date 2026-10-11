@@ -92,6 +92,12 @@ static int         s_open;
 static int         s_comboPrev; // edge-detect for the R1+O combo
 static int         s_justOpened;// swallow the opening frame's inputs
 
+static float       s_hotY = -1.0f;  // smoothed highlight y, lerps toward the cursor row
+static float       s_anim;          // 0..1 open-in progress (panel eases/slides in)
+static const char *s_noteLabel;     // toggle feedback toast
+static int         s_noteState;
+static int         s_noteTimer;
+
 // nav controls we suppress + read every frame while open
 static const uint32_t s_nav[] = {
     CTRL_UP, CTRL_DOWN, CTRL_LEFT, CTRL_RIGHT, CTRL_ACCEPT, CTRL_CANCEL
@@ -119,6 +125,9 @@ void ui_toggle_open_with_r1_o(void) {
         s_cursor = 0;
         s_stack[0] = s_root;
         s_justOpened = 1;       // eat the circle that was part of the combo
+        s_anim = 0.0f;          // play the open-in animation
+        s_hotY = -1.0f;         // snap the highlight to the first row
+        s_noteTimer = 0;
         ui_sound("MENU_ENTER");
     } else {
         ui_sound("MENU_CLOSE");
@@ -146,47 +155,75 @@ void ui_action(const char *label, void (*fn)(void)) {
 }
 
 // ---- draw -----------------------------------------------------------------
-// normalized 0..1 coords; DRAW_RECT x/y is the rect center. all positions,
-// sizes and colors below are eyeball starting points - tune on console.
+// normalized 0..1 coords; DRAW_RECT x/y is the rect center. positions, sizes
+// and colors are eyeball starting points - tune on console.
+
+// toggle checkbox: a bordered box, filled amber (checked) when on, hollow when off
+static void ui_checkbox(float cx, float cy, int on) {
+    ui_draw_rect(cx, cy, 0.014f, 0.021f, 60, 48, 30, 240);   // frame
+    ui_draw_rect(cx, cy, 0.010f, 0.015f, 18, 14, 10, 255);   // inner bg
+    if (on) ui_draw_rect(cx, cy, 0.007f, 0.010f, 214, 158, 48, 255); // check mark
+}
+
 static void ui_draw(void) {
-    const float MX = 0.150f, MW = 0.200f;         // column center + width
-    const float bannerY = 0.090f, bannerH = 0.050f;
+    const float MX = 0.150f, MW = 0.210f;         // column center + width
+    const float bannerY = 0.160f, bannerH = 0.048f;
     const float rowH = 0.035f;
     const float firstRowY = bannerY + bannerH * 0.5f + rowH * 0.5f + 0.004f;
-    const float textL = MX - MW * 0.5f + 0.010f;  // left-aligned labels
-    const float textR = MX + MW * 0.5f - 0.010f;  // right-aligned values
+    const float textL = MX - MW * 0.5f + 0.012f;  // left-aligned labels
+    const float textR = MX + MW * 0.5f - 0.016f;  // right-aligned value/checkbox
+    const float dx = (1.0f - s_anim) * -0.08f;    // slide-in from the left while opening
 
-    // banner (western red) + title (cream)
-    ui_draw_rect(MX, bannerY, MW, bannerH, 122, 20, 24, 235);
-    ui_draw_text(s_banner ? s_banner : "cowboy menu",
-                 MX, bannerY - 0.016f, 36, "title", "F2E9D0", "CENTER");
+    // brand: fixed top-center of the screen, separate from the menu panel
+    ui_draw_rect(0.5f, 0.055f, 0.28f, 0.060f, 122, 20, 24, 240);
+    ui_draw_text("COWBOY MENU", 0.5f, 0.055f - 0.020f, 42, "title", "F2E9D0", "CENTER");
+
+    // page banner (shows the current page name)
+    ui_draw_rect(MX + dx, bannerY, MW, bannerH, 92, 16, 18, 235);
+    ui_draw_text(s_banner ? s_banner : "Menu", MX + dx, bannerY - 0.015f, 30, "title", "F2E9D0", "CENTER");
 
     if (s_itemCount <= 0) return;
 
     // dark body behind the rows
     float bodyH = s_itemCount * rowH;
     float bodyY = firstRowY - rowH * 0.5f + bodyH * 0.5f;
-    ui_draw_rect(MX, bodyY, MW, bodyH, 18, 14, 10, 210);
+    ui_draw_rect(MX + dx, bodyY, MW, bodyH, 18, 14, 10, 210);
+
+    // smooth highlight bar: ease toward the cursor row
+    float targetY = firstRowY + s_cursor * rowH;
+    if (s_hotY < 0.0f) s_hotY = targetY;
+    else                s_hotY += (targetY - s_hotY) * 0.35f;
+    ui_draw_rect(MX + dx, s_hotY, MW, rowH, 214, 158, 48, 235);
 
     for (int i = 0; i < s_itemCount; i++) {
         float cy = firstRowY + i * rowH;
         int hot = (i == s_cursor);
-        if (hot) ui_draw_rect(MX, cy, MW, rowH, 214, 158, 48, 235); // amber bar
         const char *hex = hot ? "1A1206" : "D8C9A8";
         float ty = cy - 0.012f;
-        ui_draw_text(s_items[i].label, textL, ty, 22, "body", hex, "LEFT");
+        ui_draw_text(s_items[i].label, textL + dx, ty, 22, "body", hex, "LEFT");
         if (s_items[i].kind == UI_TOGGLE) {
-            const char *v = (s_items[i].state && *s_items[i].state) ? "On" : "Off";
-            ui_draw_text(v, textR, ty, 22, "body", hex, "RIGHT");
+            ui_checkbox(textR + dx, cy, s_items[i].state && *s_items[i].state);
         } else if (s_items[i].kind == UI_SUBMENU) {
-            ui_draw_text(">", textR, ty, 22, "body", hex, "RIGHT");
+            ui_draw_text(">", textR + dx, ty, 22, "body", hex, "RIGHT");
         }
+    }
+
+    // toggle feedback toast at the bottom
+    if (s_noteTimer > 0 && s_noteLabel) {
+        char t[128];
+        snprintf(t, sizeof t, "%s: %s", s_noteLabel, s_noteState ? "ENABLED" : "DISABLED");
+        ui_draw_rect(0.5f, 0.900f, 0.30f, 0.045f, 18, 14, 10, 225);
+        ui_draw_text(t, 0.5f, 0.900f - 0.015f, 24, "body",
+                     s_noteState ? "7CCB6B" : "D8795A", "CENTER");
     }
 }
 
 // ---- per-frame tick --------------------------------------------------------
 void ui_tick(void) {
     if (!s_open) return;
+
+    s_anim += (1.0f - s_anim) * 0.25f;    // ease the open-in animation
+    if (s_noteTimer > 0) s_noteTimer--;   // age the toggle toast
 
     // suppress the game reacting to our buttons this frame
     for (int i = 0; i < (int)(sizeof s_nav / sizeof s_nav[0]); i++) {
@@ -214,6 +251,7 @@ void ui_tick(void) {
         if (s_sp == 0) { s_open = 0; ui_sound("MENU_CLOSE"); return; }
         s_sp--;
         s_cursor = s_savedCursor[s_sp];
+        s_hotY = -1.0f;
         ui_sound("BACK");
         return;                 // popped page draws next frame
     }
@@ -231,7 +269,10 @@ void ui_tick(void) {
     if (accept && s_itemCount > 0) {
         ui_item *it = &s_items[s_cursor];
         if (it->kind == UI_TOGGLE) {
-            if (it->state) *it->state = !*it->state;
+            if (it->state) {
+                *it->state = !*it->state;
+                s_noteLabel = it->label; s_noteState = *it->state; s_noteTimer = 150;
+            }
             ui_sound("SELECT");
         } else if (it->kind == UI_ACTION) {
             if (it->fn) it->fn();
@@ -241,6 +282,7 @@ void ui_tick(void) {
                 s_savedCursor[s_sp] = s_cursor;
                 s_stack[++s_sp] = it->page;
                 s_cursor = 0;
+                s_hotY = -1.0f;
                 ui_sound("SELECT");
                 return;         // child page builds + draws next frame
             }
