@@ -16,6 +16,10 @@ typedef struct { float x; uint32_t _p0; float y; uint32_t _p1; float z; uint32_t
 // firing-pattern joaat used by rapid fire. VERIFY
 #define FIRING_PATTERN_FULL_AUTO 0xC6EE6B4Cu
 
+// joaat("ADD_REASON_DEFAULT"). rdr2's inventory rejects an add with a zero reason, so
+// GIVE_WEAPON_TO_PED silently does nothing without this - this was the core weapon bug.
+#define ADD_REASON_DEFAULT 0x2CD419DCu
+
 // canonical rdr2 weapon joaat hashes (build-independent, from femga/rdr3_discoveries weapons.lua)
 static const uint32_t WEAPONS[] = {
   0x169F59F7u, // revolver cattleman
@@ -287,15 +291,20 @@ void features_apply_all(uint64_t base) {
 }
 // ---- one-shot actions ----
 
+// one corrected GIVE_WEAPON_TO_PED call. inHand=1 forces it drawn, else holstered.
+// args: ped, weapon, ammo, forceInHand, forceInHolster, attachPoint(0=primary),
+//       allowMultipleCopies(0 so re-give does not stack), 0.5f, 1.0f, addReason(must be valid), ignoreUnlocks, degradation, p12
+static void give_one_weapon(int ped, uint32_t w, int ammo, int inHand) {
+  nat_call(g_base, OFF_GIVE_WEAPON_TO_PED,
+    (uint64_t[]){(uint32_t)ped, w, (uint32_t)ammo, inHand ? 1u : 0u, inHand ? 0u : 1u,
+                 0, 0, fu(0.5f), fu(1.0f), ADD_REASON_DEFAULT, 0, fu(0.0f), 0}, 13);
+  nat_call(g_base, OFF_SET_PED_AMMO, (uint64_t[]){(uint32_t)ped, w, (uint32_t)ammo}, 3);
+}
+
 static void give_all_weapons(void) {
   int ped = cur_ped(); if (!ped) return;
-  for (unsigned i = 0; i < NWEAPONS; i++) {
-    uint32_t w = WEAPONS[i];
-    // rdr2 13-arg give sig. VERIFY trailing params
-    nat_call(g_base, OFF_GIVE_WEAPON_TO_PED,
-      (uint64_t[]){(uint32_t)ped, w, 500, 0, 0, 0, 1, fu(0.5f), fu(1.0f), 0, 0, fu(0.0f), 0}, 13);
-    nat_call(g_base, OFF_SET_PED_AMMO, (uint64_t[]){(uint32_t)ped, w, 500, 0}, 4);
-  }
+  for (unsigned i = 0; i < NWEAPONS; i++)
+    give_one_weapon(ped, WEAPONS[i], 500, 0);   // holster each; they land in the wheel
 }
 
 static void give_all_ammo(void) {
@@ -304,17 +313,15 @@ static void give_all_ammo(void) {
     uint32_t w = WEAPONS[i];
     nat_call(g_base, OFF__ENABLE_ALL_SPECIAL_AMMO_FOR_PED, (uint64_t[]){(uint32_t)ped, w}, 2);
     uint32_t at = (uint32_t)nat_call(g_base, OFF_GET_PED_AMMO_TYPE_FROM_WEAPON, (uint64_t[]){(uint32_t)ped, w}, 2);
-    nat_call(g_base, OFF_SET_PED_AMMO_BY_TYPE, (uint64_t[]){(uint32_t)ped, at, 500}, 3);
-    nat_call(g_base, OFF_SET_PED_AMMO, (uint64_t[]){(uint32_t)ped, w, 500, 0}, 4);
+    if (at) nat_call(g_base, OFF_SET_PED_AMMO_BY_TYPE, (uint64_t[]){(uint32_t)ped, at, 500}, 3);
+    nat_call(g_base, OFF_SET_PED_AMMO, (uint64_t[]){(uint32_t)ped, w, 500}, 3);   // 3-arg, old n=4 was wrong
   }
 }
 
 static void equip_semi_auto(void) {
   int ped = cur_ped(); if (!ped) return;
-  for (unsigned i = 0; i < NSEMIAUTO; i++) {
-    nat_call(g_base, OFF_GIVE_WEAPON_TO_PED,
-      (uint64_t[]){(uint32_t)ped, SEMIAUTO[i], 500, 0, 0, 0, 1, fu(0.5f), fu(1.0f), 0, 0, fu(0.0f), 0}, 13);
-  }
+  give_one_weapon(ped, SEMIAUTO[0], 500, 1);   // primary drawn (forces stream+draw now)
+  for (unsigned i = 1; i < NSEMIAUTO; i++) give_one_weapon(ped, SEMIAUTO[i], 500, 0);
   nat_call(g_base, OFF_SET_CURRENT_PED_WEAPON, (uint64_t[]){(uint32_t)ped, SEMIAUTO[0], 1, 0, 0, 0}, 6);
 }
 
