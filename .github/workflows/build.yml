@@ -1,0 +1,33 @@
+name: build plugin
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install llvm and lld
+        run: sudo apt-get update && sudo apt-get install -y llvm lld
+
+      - name: fetch openorbis toolchain
+        run: |
+          curl -sL https://github.com/illusion0001/OpenOrbis-PS4-Toolchain/releases/latest/download/toolchain.tar.gz | tar xz -C "$HOME"
+          echo "OO_PS4_TOOLCHAIN=$HOME/OpenOrbis/PS4Toolchain" >> "$GITHUB_ENV"
+
+      - name: build and install goldhen sdk
+        run: |
+          git clone --depth 1 https://github.com/GoldHEN/GoldHEN_Plugins_SDK.git
+          make -C GoldHEN_Plugins_SDK
+          make -C GoldHEN_Plugins_SDK install
+          cp GoldHEN_Plugins_SDK/build/crtprx.o "$OO_PS4_TOOLCHAIN/lib/crtprx.o"
+
+      - name: build plugin
+        run: make
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cowboy_menu-prx
+          path: cowboy_menu.prx

@@ -1,0 +1,11 @@
+bin/
+.venv/
+__pycache__/
+*.pyc
+build/
+*.o
+*.prx
+*.elf
+*.oelf
+tasks/
+.DS_Store
