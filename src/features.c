@@ -78,7 +78,7 @@ static int cur_ped(void) {
 // ---- menu layout ----
 
 void features_build_root(void) {
-  ui_title("cowboy menu");
+  ui_title("Main");
   ui_submenu("Player", player_page);
   ui_submenu("Weapon Options", weapon_page);
   ui_submenu("Horse Options", horse_page);
