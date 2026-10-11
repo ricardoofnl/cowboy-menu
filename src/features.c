@@ -361,6 +361,7 @@ static void give_all_weapons(void) {
   int ped = cur_ped(); if (!ped) return;
   for (unsigned i = 0; i < NWEAPONS; i++)
     give_one_weapon(ped, WEAPONS[i], 500, 0);   // holster each; they land in the wheel
+  ui_notify("all weapons given");
 }
 
 static void give_all_ammo(void) {
@@ -377,14 +378,15 @@ static void give_all_ammo(void) {
 // give the whole arsenal, then show the long guns on the horse saddle holsters
 static void give_all_weapons_to_horse(void) {
   int ped = cur_ped(); if (!ped) return;
-  if (!(int)nat_call(g_base, OFF_IS_PED_ON_MOUNT, (uint64_t[]){(uint32_t)ped}, 1)) return;
+  if (!(int)nat_call(g_base, OFF_IS_PED_ON_MOUNT, (uint64_t[]){(uint32_t)ped}, 1)) { ui_notify("mount a horse first"); return; }
   int mount = (int)nat_call(g_base, OFF_GET_MOUNT, (uint64_t[]){(uint32_t)ped}, 1);
-  if (!mount) return;
+  if (!mount) { ui_notify("mount a horse first"); return; }
   for (unsigned i = 0; i < NWEAPONS; i++) give_one_weapon(ped, WEAPONS[i], 500, 0);
   nat_call(g_base, OFF__DELETE_WEAPON_OBJECTS_ON_HORSE, (uint64_t[]){(uint32_t)mount}, 1); // clean rack first
   // attach each long arm: (horse, weaponHash, ownerPed). saddle only shows ~2 at once, rest stay owned
   for (unsigned i = 0; i < NLONGARMS; i++)
     nat_call(g_base, OFF__ATTACH_WEAPON_TO_HORSE_HOLSTER, (uint64_t[]){(uint32_t)mount, LONGARMS[i], (uint32_t)ped}, 3);
+  ui_notify("weapons on the horse");
 }
 
 static void equip_semi_auto(void) {

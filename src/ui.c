@@ -65,14 +65,17 @@ static void ui_sound(const char *name) {
 }
 
 // ---- menu state -----------------------------------------------------------
-enum { UI_TOGGLE, UI_SUBMENU, UI_ACTION };
+enum { UI_TOGGLE, UI_SUBMENU, UI_ACTION, UI_SCROLL_INT, UI_SCROLL_OPT };
 
 typedef struct {
-    int          kind;
-    const char  *label;
-    int         *state;         // UI_TOGGLE
-    void       (*page)(void);   // UI_SUBMENU
-    void       (*fn)(void);     // UI_ACTION
+    int                kind;
+    const char        *label;
+    int               *state;        // UI_TOGGLE flag / scroller value or index
+    void             (*page)(void);  // UI_SUBMENU
+    void             (*fn)(void);    // UI_ACTION
+    int                lo, hi, step; // UI_SCROLL_INT bounds
+    const char *const *opts;         // UI_SCROLL_OPT labels
+    int                nopts;
 } ui_item;
 
 #define UI_MAX_ITEMS 32
@@ -94,8 +97,8 @@ static int         s_justOpened;// swallow the opening frame's inputs
 
 static float       s_hotY = -1.0f;  // smoothed highlight y, lerps toward the cursor row
 static float       s_anim;          // 0..1 open-in progress (panel eases/slides in)
-static const char *s_noteLabel;     // toggle feedback toast
-static int         s_noteState;
+static char        s_noteMsg[128];  // toast text
+static const char *s_noteCol = "E8D9B8";
 static int         s_noteTimer;
 
 // nav controls we suppress + read every frame while open
@@ -142,6 +145,7 @@ static ui_item *ui_push(int kind, const char *label) {
     ui_item *it = &s_items[s_itemCount++];
     it->kind = kind; it->label = label;
     it->state = 0; it->page = 0; it->fn = 0;
+    it->lo = it->hi = it->step = 0; it->opts = 0; it->nopts = 0;
     return it;
 }
 void ui_toggle(const char *label, int *state) {
@@ -152,6 +156,19 @@ void ui_submenu(const char *label, void (*page)(void)) {
 }
 void ui_action(const char *label, void (*fn)(void)) {
     ui_item *it = ui_push(UI_ACTION, label); if (it) it->fn = fn;
+}
+void ui_scroll_int(const char *label, int *val, int lo, int hi, int step) {
+    ui_item *it = ui_push(UI_SCROLL_INT, label);
+    if (it) { it->state = val; it->lo = lo; it->hi = hi; it->step = step; }
+}
+void ui_scroll_opt(const char *label, int *idx, const char *const *opts, int count) {
+    ui_item *it = ui_push(UI_SCROLL_OPT, label);
+    if (it) { it->state = idx; it->opts = opts; it->nopts = count; }
+}
+void ui_notify(const char *msg) {
+    snprintf(s_noteMsg, sizeof s_noteMsg, "%s", msg ? msg : "");
+    s_noteCol = "E8D9B8";
+    s_noteTimer = 150;
 }
 
 // ---- draw -----------------------------------------------------------------
@@ -205,21 +222,27 @@ static void ui_draw(void) {
         int hot = (i == s_cursor);
         const char *hex = hot ? "1A1206" : "D8C9A8";
         float ty = cy - 0.012f;
-        ui_draw_text(s_items[i].label, textL + dx, ty, 22, "body", hex, "LEFT");
-        if (s_items[i].kind == UI_TOGGLE) {
-            ui_checkbox(textR + dx, cy, s_items[i].state && *s_items[i].state);
-        } else if (s_items[i].kind == UI_SUBMENU) {
-            ui_draw_text(">", textR + dx, ty, 22, "body", hex, "RIGHT");
+        ui_item *it = &s_items[i];
+        ui_draw_text(it->label, textL + dx, ty, 22, "body", hex, "LEFT");
+        if (it->kind == UI_TOGGLE) {
+            ui_checkbox(textR + dx, cy, it->state && *it->state);
+        } else if (it->kind == UI_SUBMENU) {
+            ui_draw_text(">", textL + dx + 0.185f, ty, 22, "body", hex, "LEFT");
+        } else if (it->kind == UI_SCROLL_INT) {
+            char vb[32]; snprintf(vb, sizeof vb, "< %d >", it->state ? *it->state : 0);
+            ui_draw_text(vb, textL + dx + 0.120f, ty, 22, "body", hex, "LEFT");
+        } else if (it->kind == UI_SCROLL_OPT) {
+            const char *v = (it->state && it->opts && *it->state >= 0 && *it->state < it->nopts)
+                            ? it->opts[*it->state] : "";
+            char vb[48]; snprintf(vb, sizeof vb, "< %s >", v);
+            ui_draw_text(vb, textL + dx + 0.100f, ty, 22, "body", hex, "LEFT");
         }
     }
 
-    // toggle feedback toast at the bottom
-    if (s_noteTimer > 0 && s_noteLabel) {
-        char t[128];
-        snprintf(t, sizeof t, "%s: %s", s_noteLabel, s_noteState ? "ENABLED" : "DISABLED");
-        ui_draw_rect(0.5f, 0.900f, 0.26f, 0.040f, 18, 14, 10, 235);
-        ui_draw_text(t, 0.0f, 0.900f - 20 * 0.0004f, 20, "body",
-                     s_noteState ? "7CCB6B" : "D8795A", "CENTER");
+    // toast at the bottom-center (toggles + action messages via ui_notify)
+    if (s_noteTimer > 0 && s_noteMsg[0]) {
+        ui_draw_rect(0.5f, 0.900f, 0.30f, 0.040f, 18, 14, 10, 235);
+        ui_draw_text(s_noteMsg, 0.0f, 0.900f - 20 * 0.0004f, 20, "body", s_noteCol, "CENTER");
     }
 }
 
@@ -239,11 +262,13 @@ void ui_tick(void) {
     // read nav as edges off the disabled controls (same as the base)
     int up     = ui_ctrl_just_dis(CTRL_UP);
     int down   = ui_ctrl_just_dis(CTRL_DOWN);
+    int left   = ui_ctrl_just_dis(CTRL_LEFT);
+    int right  = ui_ctrl_just_dis(CTRL_RIGHT);
     int accept = ui_ctrl_just_dis(CTRL_ACCEPT);
     int cancel = ui_ctrl_just_dis(CTRL_CANCEL);
 
     // the opening frame's circle is still down - ignore it once
-    if (s_justOpened) { s_justOpened = 0; up = down = accept = cancel = 0; }
+    if (s_justOpened) { s_justOpened = 0; up = down = left = right = accept = cancel = 0; }
 
     // build the current page's item list
     s_itemCount = 0;
@@ -270,16 +295,33 @@ void ui_tick(void) {
         s_cursor = 0;
     }
 
+    // left/right adjusts a scroller on the current row
+    if ((left || right) && s_itemCount > 0) {
+        ui_item *it = &s_items[s_cursor];
+        if (it->kind == UI_SCROLL_INT && it->state) {
+            *it->state += right ? it->step : -it->step;
+            if (*it->state < it->lo) *it->state = it->lo;
+            if (*it->state > it->hi) *it->state = it->hi;
+            ui_sound("NAV_LEFT");
+        } else if (it->kind == UI_SCROLL_OPT && it->state && it->nopts > 0) {
+            *it->state = (*it->state + (right ? 1 : -1) + it->nopts) % it->nopts;
+            ui_sound("NAV_LEFT");
+        }
+    }
+
     // select / toggle / push
     if (accept && s_itemCount > 0) {
         ui_item *it = &s_items[s_cursor];
         if (it->kind == UI_TOGGLE) {
             if (it->state) {
                 *it->state = !*it->state;
-                s_noteLabel = it->label; s_noteState = *it->state; s_noteTimer = 150;
+                snprintf(s_noteMsg, sizeof s_noteMsg, "%s: %s", it->label, *it->state ? "ENABLED" : "DISABLED");
+                s_noteCol = *it->state ? "7CCB6B" : "D8795A";
+                s_noteTimer = 150;
             }
             ui_sound("SELECT");
         } else if (it->kind == UI_ACTION) {
+            ui_notify(it->label);     // default toast; the fn can override via ui_notify()
             if (it->fn) it->fn();
             ui_sound("SELECT");
         } else if (it->kind == UI_SUBMENU) {
