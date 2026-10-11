@@ -310,6 +310,12 @@ void features_apply_all(uint64_t base) {
     if (g_feat.horse_unlimited_stamina) {
       nat_call(base, OFF__SET_ATTRIBUTE_CORE_VALUE, (uint64_t[]){(uint32_t)mount, 1, 100}, 3);
       nat_call(base, OFF__ENABLE_ATTRIBUTE_CORE_OVERPOWER, (uint64_t[]){(uint32_t)mount, 1, fu(100.0f), 0}, 4);
+      // the overpower core only refills the reservoir - the gallop drains the stamina BAR, so top
+      // the bar itself every frame. that is what makes it truly unlimited (not just a one-shot tonic).
+      union { float f; uint32_t u; } cur, mx;
+      cur.u = (uint32_t)nat_call(base, OFF__GET_PED_STAMINA,     (uint64_t[]){(uint32_t)mount}, 1);
+      mx.u  = (uint32_t)nat_call(base, OFF__GET_PED_MAX_STAMINA, (uint64_t[]){(uint32_t)mount}, 1);
+      if (mx.f > cur.f) nat_call(base, OFF__CHANGE_PED_STAMINA, (uint64_t[]){(uint32_t)mount, fu(mx.f - cur.f)}, 2);
     } else if (prev.horse_unlimited_stamina) {
       nat_call(base, OFF__ENABLE_ATTRIBUTE_CORE_OVERPOWER, (uint64_t[]){(uint32_t)mount, 1, fu(0.0f), 0}, 4);
     }
