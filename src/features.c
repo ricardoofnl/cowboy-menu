@@ -96,6 +96,7 @@ static void player_page(void);
 static void weapon_page(void);
 static void horse_page(void);
 static void give_all_weapons(void);
+static void max_upgrade_all_weapons(void);
 static void give_all_ammo(void);
 static void give_all_weapons_to_horse(void);
 static void equip_semi_auto(void);
@@ -156,6 +157,7 @@ static void weapon_page(void) {
   ui_action("Dual Wield: Enable", dual_wield_enable);
   ui_action("Dual Wield: Disable", dual_wield_disable);
   ui_action("Take All Weapons", take_all_weapons);
+  ui_action("Max Upgrade All Weapons", max_upgrade_all_weapons);
   ui_toggle("Infinite Ammo", &g_feat.infinite_ammo);
   ui_toggle("One Hit Kill", &g_feat.one_hit_kill);
   ui_toggle("Teleport Gun", &g_feat.teleport_gun);
@@ -403,6 +405,63 @@ static void give_all_weapons(void) {
   for (unsigned i = 0; i < NWEAPONS; i++)
     give_one_weapon(ped, WEAPONS[i], 500, 0);   // holster each; they land in the wheel
   ui_notify("all weapons given");
+}
+
+// ---- max upgrade all weapons ----
+// one functional "max" part per exclusive slot (longest barrel, extended clip/mag/tube, wide
+// iron sight, grip/stock, scope on bolt rifles). cosmetic variants and FRAME_VERTDATA are left
+// out (FRAME_VERTDATA breaks other parts' colors). component joaats from rdr3_discoveries.
+static const uint32_t UC_CATTLEMAN[]   = { 0xDC341AAFu, 0x7FD24272u, 0x1B0D8E5Bu };
+static const uint32_t UC_SCHOFIELD[]   = { 0xE4297827u, 0x3DC5FDB4u, 0x1AC7DA45u };
+static const uint32_t UC_DBLACTION[]   = { 0xF3F3B915u, 0x12CCC827u, 0x07B98DFAu };
+static const uint32_t UC_LEMAT[]       = { 0xDAF3F542u, 0xFFC04F8Cu, 0x1D3BC7CBu };
+static const uint32_t UC_VOLCANIC[]    = { 0x060E9CC0u, 0x50751553u, 0x9F63E06Fu };
+static const uint32_t UC_SEMIPISTOL[]  = { 0x1C1B73B5u, 0xAED91016u, 0x4996CF3Bu, 0x450D34A6u };
+static const uint32_t UC_MAUSER[]      = { 0x23EEE15Du, 0xD530C2F5u, 0x1A81703Bu, 0xB668EC21u };
+static const uint32_t UC_M1899[]       = { 0x6320A202u, 0xED5F4FD1u, 0x6E10FF97u, 0x1238DDA2u };
+static const uint32_t UC_CARBINE[]     = { 0x8E4EEB68u, 0xBE847594u, 0x841D047Eu, 0xF0155D7Bu };
+static const uint32_t UC_WINCHESTER[]  = { 0xC0039CB3u, 0x70E491BEu };
+static const uint32_t UC_HENRY[]       = { 0x70659657u, 0xBA8F2CB4u };
+static const uint32_t UC_EVANS[]       = { 0x992E47B8u, 0x19B9F165u };
+static const uint32_t UC_SPRINGFIELD[] = { 0x65768D87u, 0x97DB6895u, 0x920B56D7u };
+static const uint32_t UC_BOLTACTION[]  = { 0x4E58B5E0u, 0x4E2B941Cu, 0x920B56D7u };
+static const uint32_t UC_VARMINT[]     = { 0xFCEE9E62u, 0x6F011007u, 0xB2B1CA8Du };
+static const uint32_t UC_ROLLINGBLOCK[]= { 0x8D6E0798u, 0xDEE616DBu, 0x920B56D7u };
+static const uint32_t UC_CARCANO[]     = { 0x570DC440u, 0xEE3095C6u, 0x82A9B7B5u };
+static const uint32_t UC_SG_PUMP[]     = { 0xE8218EBCu, 0x16269609u, 0xADA238F1u, 0xF98B3538u };
+static const uint32_t UC_SG_DOUBLE[]   = { 0xA1371765u, 0xA2909F48u, 0x575F58BEu, 0x2D6A1AFCu };
+static const uint32_t UC_SG_SAWED[]    = { 0xF9AAA5A2u, 0xD2F83D2Du, 0xC69F8FC9u };
+static const uint32_t UC_SG_REPEAT[]   = { 0x59D6C67Fu, 0x95688A19u, 0xE963C18Fu };
+static const uint32_t UC_SG_SEMI[]     = { 0x79B1589Cu, 0xB57E782Du, 0x099EE88Fu };
+
+typedef struct { uint32_t weapon; const uint32_t *comps; unsigned n; } WeaponUpgrade;
+#define UG(w, arr) { (w), (arr), (unsigned)(sizeof(arr) / sizeof((arr)[0])) }
+static const WeaponUpgrade WEAPON_UPGRADES[] = {
+  UG(0x169F59F7u, UC_CATTLEMAN),   UG(0x7BBD1FF6u, UC_SCHOFIELD),
+  UG(0x0797FBF5u, UC_DBLACTION),   UG(0x5B2D26B5u, UC_LEMAT),
+  UG(0x020D13FFu, UC_VOLCANIC),    UG(0x657065D6u, UC_SEMIPISTOL),
+  UG(0x8580C63Eu, UC_MAUSER),      UG(0x5B78B8DDu, UC_M1899),
+  UG(0xF5175BA1u, UC_CARBINE),     UG(0xA84762ECu, UC_WINCHESTER),
+  UG(0x95B24592u, UC_HENRY),       UG(0x7194721Eu, UC_EVANS),
+  UG(0x63F46DE6u, UC_SPRINGFIELD), UG(0x772C8DD6u, UC_BOLTACTION),
+  UG(0xDDF7BC1Eu, UC_VARMINT),     UG(0xE1D2B317u, UC_ROLLINGBLOCK),
+  UG(0x53944780u, UC_CARCANO),     UG(0x31B7B9FEu, UC_SG_PUMP),
+  UG(0x6DFA071Bu, UC_SG_DOUBLE),   UG(0x1765A8F8u, UC_SG_SAWED),
+  UG(0x63CA782Au, UC_SG_REPEAT),   UG(0x6D9BB970u, UC_SG_SEMI),
+};
+#define NUPGRADES (sizeof(WEAPON_UPGRADES) / sizeof(WEAPON_UPGRADES[0]))
+
+static void max_upgrade_all_weapons(void) {
+  int ped = cur_ped(); if (!ped) return;
+  for (unsigned i = 0; i < NUPGRADES; i++) {
+    const WeaponUpgrade *u = &WEAPON_UPGRADES[i];
+    give_one_weapon(ped, u->weapon, 500, 0);   // must own the gun before a component attaches
+    // _GIVE_WEAPON_COMPONENT_TO_ENTITY(entity, componentHash, weaponHash, p3=1) - component THEN weapon
+    for (unsigned j = 0; j < u->n; j++)
+      nat_call(g_base, OFF__GIVE_WEAPON_COMPONENT_TO_ENTITY,
+               (uint64_t[]){(uint32_t)ped, u->comps[j], u->weapon, 1}, 4);
+  }
+  ui_notify("all weapons maxed");
 }
 
 static void give_all_ammo(void) {
