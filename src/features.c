@@ -58,12 +58,23 @@ static const uint32_t WEAPONS[] = {
 static const uint32_t SEMIAUTO[] = { 0x657065D6u, 0x8580C63Eu, 0x6D9BB970u };
 #define NSEMIAUTO (sizeof(SEMIAUTO) / sizeof(SEMIAUTO[0]))
 
+// long guns only - the horse saddle holsters hold long arms + bow, not sidearms/throwables/melee
+static const uint32_t LONGARMS[] = {
+  0xF5175BA1u, 0xA84762ECu, 0x95B24592u, 0x7194721Eu, // repeaters
+  0x63F46DE6u, 0x772C8DD6u, 0xDDF7BC1Eu,              // rifles
+  0xE1D2B317u, 0x53944780u,                           // snipers
+  0x31B7B9FEu, 0x6DFA071Bu, 0x63CA782Au, 0x6D9BB970u, // shotguns
+  0x88A8505Cu,                                        // bow
+};
+#define NLONGARMS (sizeof(LONGARMS) / sizeof(LONGARMS[0]))
+
 // forward decls
 static void player_page(void);
 static void weapon_page(void);
 static void horse_page(void);
 static void give_all_weapons(void);
 static void give_all_ammo(void);
+static void give_all_weapons_to_horse(void);
 static void equip_semi_auto(void);
 static void equip_best_weapons(void);
 static void dual_wield_enable(void);
@@ -108,6 +119,7 @@ static void weapon_page(void) {
   ui_title("Weapon Options");
   ui_action("Give All Weapons", give_all_weapons);
   ui_action("Give All Ammo", give_all_ammo);
+  ui_action("Give All Weapons To Horse", give_all_weapons_to_horse);
   ui_action("Equip Semi-Auto", equip_semi_auto);
   ui_action("Equip Best Weapons", equip_best_weapons);
   ui_action("Dual Wield: Enable", dual_wield_enable);
@@ -176,10 +188,17 @@ void features_apply_all(uint64_t base) {
     nat_call(base, OFF__SET_LAW_DISABLED, (uint64_t[]){0}, 1);
   }
 
-  // super run / swim / jump - strictly per-frame, no restore needed
-  if (g_feat.super_run)  nat_call(base, OFF_SET_PED_MOVE_RATE_OVERRIDE, (uint64_t[]){(uint32_t)ped, fu(1.5f)}, 2);
+  // super run - move_rate_override is animation-only (did nothing). a forward impulse each frame
+  // while actually running is what speeds the player up. y=+20 is entity-local forward, flag 1 = impulse.
+  if (g_feat.super_run && ped &&
+      !(int)nat_call(base, OFF_IS_PED_RAGDOLL, (uint64_t[]){(uint32_t)ped}, 1) &&
+      ((int)nat_call(base, OFF_IS_PED_RUNNING,   (uint64_t[]){(uint32_t)ped}, 1) ||
+       (int)nat_call(base, OFF_IS_PED_SPRINTING, (uint64_t[]){(uint32_t)ped}, 1)))
+    nat_call(base, OFF_APPLY_FORCE_TO_ENTITY,
+      (uint64_t[]){(uint32_t)ped, 1, fu(0.0f), fu(20.0f), fu(0.0f), fu(0.0f), fu(0.0f), fu(0.0f),
+                   1, 1, 1, 1, 0, 1}, 14);
   if (g_feat.super_swim) nat_call(base, OFF_SET_SWIM_MULTIPLIER_FOR_PLAYER, (uint64_t[]){(uint32_t)player, fu(1.49f)}, 2);
-  if (g_feat.super_jump) nat_call(base, OFF_SET_SUPER_JUMP_THIS_FRAME, (uint64_t[]){(uint32_t)player}, 1); // VERIFY weak in rdr2
+  if (g_feat.super_jump) nat_call(base, OFF_SET_SUPER_JUMP_THIS_FRAME, (uint64_t[]){(uint32_t)player}, 1); // weak in rdr2
 
   // invisibility
   if (g_feat.invisible)       nat_call(base, OFF_SET_ENTITY_VISIBLE, (uint64_t[]){(uint32_t)ped, 0}, 2);
@@ -279,34 +298,47 @@ void features_apply_all(uint64_t base) {
   // ---- horse: resolve the mount, apply to it ----
   int anyHorse = g_feat.horse_unlimited_stamina || g_feat.horse_god ||
                  g_feat.horse_invisible || g_feat.horse_super_run ||
-                 prev.horse_god || prev.horse_invisible;
+                 prev.horse_god || prev.horse_invisible || prev.horse_unlimited_stamina;
   int mount = 0;
   if (anyHorse && ped &&
       (int)nat_call(base, OFF_IS_PED_ON_MOUNT, (uint64_t[]){(uint32_t)ped}, 1)) {
     mount = (int)nat_call(base, OFF_GET_MOUNT, (uint64_t[]){(uint32_t)ped}, 1);
   }
-  // off-paths only run while mounted; if dismounted before toggling off, the entity handle is gone
   if (mount) {
-    if (g_feat.horse_unlimited_stamina)
-      nat_call(base, OFF__SET_ATTRIBUTE_CORE_VALUE, (uint64_t[]){(uint32_t)mount, 1, 100}, 3); // VERIFY core idx
+    // unlimited stamina - the core write alone never touched the gallop-draining BAR; overpower
+    // the stamina core (idx 1) so it stops draining.
+    if (g_feat.horse_unlimited_stamina) {
+      nat_call(base, OFF__SET_ATTRIBUTE_CORE_VALUE, (uint64_t[]){(uint32_t)mount, 1, 100}, 3);
+      nat_call(base, OFF__ENABLE_ATTRIBUTE_CORE_OVERPOWER, (uint64_t[]){(uint32_t)mount, 1, fu(100.0f), 0}, 4);
+    } else if (prev.horse_unlimited_stamina) {
+      nat_call(base, OFF__ENABLE_ATTRIBUTE_CORE_OVERPOWER, (uint64_t[]){(uint32_t)mount, 1, fu(0.0f), 0}, 4);
+    }
 
+    // god mode - block damage both ways, keep health core full, guard the bar restore
     if (g_feat.horse_god) {
       nat_call(base, OFF_SET_ENTITY_INVINCIBLE, (uint64_t[]){(uint32_t)mount, 1}, 2);
-      nat_call(base, OFF__SET_ATTRIBUTE_CORE_VALUE, (uint64_t[]){(uint32_t)mount, 0, 100}, 3); // VERIFY core 0=health
+      nat_call(base, OFF_SET_ENTITY_CAN_BE_DAMAGED, (uint64_t[]){(uint32_t)mount, 0}, 2);
+      nat_call(base, OFF__SET_ATTRIBUTE_CORE_VALUE, (uint64_t[]){(uint32_t)mount, 0, 100}, 3);
       int mh = (int)nat_call(base, OFF_GET_ENTITY_MAX_HEALTH, (uint64_t[]){(uint32_t)mount, 0}, 2);
-      nat_call(base, OFF_SET_ENTITY_HEALTH, (uint64_t[]){(uint32_t)mount, (uint32_t)mh, 0}, 3);
+      if (mh > 0) nat_call(base, OFF_SET_ENTITY_HEALTH, (uint64_t[]){(uint32_t)mount, (uint32_t)mh, 0}, 3);
     } else if (prev.horse_god) {
       nat_call(base, OFF_SET_ENTITY_INVINCIBLE, (uint64_t[]){(uint32_t)mount, 0}, 2);
+      nat_call(base, OFF_SET_ENTITY_CAN_BE_DAMAGED, (uint64_t[]){(uint32_t)mount, 1}, 2);
     }
 
-    if (g_feat.horse_invisible)       nat_call(base, OFF_SET_ENTITY_VISIBLE, (uint64_t[]){(uint32_t)mount, 0}, 2);
-    else if (prev.horse_invisible)    nat_call(base, OFF_SET_ENTITY_VISIBLE, (uint64_t[]){(uint32_t)mount, 1}, 2);
+    // invisibility - SET_ENTITY_VISIBLE(false) cascades to the attached rider and hides the player;
+    // alpha fades only the mount's own drawables, so the rider stays visible.
+    if (g_feat.horse_invisible)       nat_call(base, OFF_SET_ENTITY_ALPHA, (uint64_t[]){(uint32_t)mount, 0, 0}, 3);
+    else if (prev.horse_invisible)    nat_call(base, OFF_RESET_ENTITY_ALPHA, (uint64_t[]){(uint32_t)mount}, 1);
 
-    if (g_feat.horse_super_run) {
-      nat_call(base, OFF_SET_PED_MOVE_RATE_OVERRIDE, (uint64_t[]){(uint32_t)mount, fu(1.15f)}, 2);
-      nat_call(base, OFF_SET_ATTRIBUTE_BASE_RANK, (uint64_t[]){(uint32_t)mount, 5, 100}, 3); // VERIFY PA_SPEED=5
-      nat_call(base, OFF_SET_ATTRIBUTE_BASE_RANK, (uint64_t[]){(uint32_t)mount, 6, 100}, 3); // VERIFY PA_ACCEL=6
-    }
+    // super run - impulse each frame while the horse is actually galloping (move-rate was anim-only)
+    if (g_feat.horse_super_run &&
+        !(int)nat_call(base, OFF_IS_PED_RAGDOLL, (uint64_t[]){(uint32_t)mount}, 1) &&
+        ((int)nat_call(base, OFF_IS_PED_RUNNING,   (uint64_t[]){(uint32_t)mount}, 1) ||
+         (int)nat_call(base, OFF_IS_PED_SPRINTING, (uint64_t[]){(uint32_t)mount}, 1)))
+      nat_call(base, OFF_APPLY_FORCE_TO_ENTITY,
+        (uint64_t[]){(uint32_t)mount, 1, fu(0.0f), fu(20.0f), fu(0.0f), fu(0.0f), fu(0.0f), fu(0.0f),
+                     1, 1, 1, 1, 0, 1}, 14);
   }
 
   prev = g_feat;
@@ -317,9 +349,11 @@ void features_apply_all(uint64_t base) {
 // args: ped, weapon, ammo, forceInHand, forceInHolster, attachPoint(0=primary),
 //       allowMultipleCopies(0 so re-give does not stack), 0.5f, 1.0f, addReason(must be valid), ignoreUnlocks, degradation, p12
 static void give_one_weapon(int ped, uint32_t w, int ammo, int inHand) {
+  // 11th arg = bIgnoreUnlocks MUST be 1: with 0, story/unlock-locked weapons are silently
+  // rejected (that was the partial give-all bug).
   nat_call(g_base, OFF_GIVE_WEAPON_TO_PED,
     (uint64_t[]){(uint32_t)ped, w, (uint32_t)ammo, inHand ? 1u : 0u, inHand ? 0u : 1u,
-                 0, 0, fu(0.5f), fu(1.0f), ADD_REASON_DEFAULT, 0, fu(0.0f), 0}, 13);
+                 0, 0, fu(0.5f), fu(1.0f), ADD_REASON_DEFAULT, 1, fu(0.0f), 0}, 13);
   nat_call(g_base, OFF_SET_PED_AMMO, (uint64_t[]){(uint32_t)ped, w, (uint32_t)ammo}, 3);
 }
 
@@ -338,6 +372,19 @@ static void give_all_ammo(void) {
     if (at) nat_call(g_base, OFF_SET_PED_AMMO_BY_TYPE, (uint64_t[]){(uint32_t)ped, at, 500}, 3);
     nat_call(g_base, OFF_SET_PED_AMMO, (uint64_t[]){(uint32_t)ped, w, 500}, 3);   // 3-arg, old n=4 was wrong
   }
+}
+
+// give the whole arsenal, then show the long guns on the horse saddle holsters
+static void give_all_weapons_to_horse(void) {
+  int ped = cur_ped(); if (!ped) return;
+  if (!(int)nat_call(g_base, OFF_IS_PED_ON_MOUNT, (uint64_t[]){(uint32_t)ped}, 1)) return;
+  int mount = (int)nat_call(g_base, OFF_GET_MOUNT, (uint64_t[]){(uint32_t)ped}, 1);
+  if (!mount) return;
+  for (unsigned i = 0; i < NWEAPONS; i++) give_one_weapon(ped, WEAPONS[i], 500, 0);
+  nat_call(g_base, OFF__DELETE_WEAPON_OBJECTS_ON_HORSE, (uint64_t[]){(uint32_t)mount}, 1); // clean rack first
+  // attach each long arm: (horse, weaponHash, ownerPed). saddle only shows ~2 at once, rest stay owned
+  for (unsigned i = 0; i < NLONGARMS; i++)
+    nat_call(g_base, OFF__ATTACH_WEAPON_TO_HORSE_HOLSTER, (uint64_t[]){(uint32_t)mount, LONGARMS[i], (uint32_t)ped}, 3);
 }
 
 static void equip_semi_auto(void) {
