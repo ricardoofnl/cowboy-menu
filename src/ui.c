@@ -167,19 +167,22 @@ static void ui_checkbox(float cx, float cy, int on) {
 
 static void ui_draw(void) {
     const float MX = 0.150f, MW = 0.210f;         // column center + width
-    const float bannerY = 0.130f, bannerH = 0.048f;
+    const float bannerY = 0.138f, bannerH = 0.040f;
     const float rowH = 0.035f;
     const float firstRowY = bannerY + bannerH * 0.5f + rowH * 0.5f + 0.004f;
     const float textL = MX - MW * 0.5f + 0.012f;  // left-aligned labels
     const float textR = MX + MW * 0.5f - 0.016f;  // right-aligned value/checkbox
     const float dx = (1.0f - s_anim) * -0.08f;    // slide-in from the left while opening
 
-    // title sits directly above the menu panel (no top-center brand)
-    ui_draw_text("COWBOY MENU", MX + dx, bannerY - bannerH * 0.5f - 0.030f, 30, "title", "F2E9D0", "CENTER");
+    // brand box: COWBOY MENU centered inside the red box above the menu
+    const float brandH = 0.046f;
+    const float brandY = bannerY - bannerH * 0.5f - brandH * 0.5f - 0.003f;
+    ui_draw_rect(MX + dx, brandY, MW, brandH, 122, 20, 24, 240);
+    ui_draw_text("COWBOY MENU", MX + dx, brandY - 30 * 0.00055f, 30, "title", "F2E9D0", "CENTER");
 
-    // page banner (shows the current page name)
-    ui_draw_rect(MX + dx, bannerY, MW, bannerH, 92, 16, 18, 235);
-    ui_draw_text(s_banner ? s_banner : "Menu", MX + dx, bannerY - 0.012f, 24, "title", "F2E9D0", "CENTER");
+    // page box: current page name centered inside
+    ui_draw_rect(MX + dx, bannerY, MW, bannerH, 60, 10, 12, 235);
+    ui_draw_text(s_banner ? s_banner : "Menu", MX + dx, bannerY - 22 * 0.00055f, 22, "body", "E8D9B8", "CENTER");
 
     if (s_itemCount <= 0) return;
 
@@ -211,8 +214,8 @@ static void ui_draw(void) {
     if (s_noteTimer > 0 && s_noteLabel) {
         char t[128];
         snprintf(t, sizeof t, "%s: %s", s_noteLabel, s_noteState ? "ENABLED" : "DISABLED");
-        ui_draw_rect(0.5f, 0.900f, 0.32f, 0.040f, 18, 14, 10, 230);
-        ui_draw_text(t, 0.5f, 0.900f - 0.012f, 22, "body",
+        ui_draw_rect(0.5f, 0.900f, 0.44f, 0.044f, 18, 14, 10, 235);
+        ui_draw_text(t, 0.5f, 0.900f - 20 * 0.00055f, 20, "body",
                      s_noteState ? "7CCB6B" : "D8795A", "CENTER");
     }
 }
