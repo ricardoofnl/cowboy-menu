@@ -265,8 +265,13 @@ void ui_tick(void) {
     // read nav as edges off the disabled controls (same as the base)
     int up     = ui_ctrl_just_dis(CTRL_UP);
     int down   = ui_ctrl_just_dis(CTRL_DOWN);
-    int left   = ui_ctrl_just_dis(CTRL_LEFT);
-    int right  = ui_ctrl_just_dis(CTRL_RIGHT);
+    // left/right: edge-detect off the HELD disabled state - the "just pressed" variant doesn't
+    // fire for frontend left/right on this build, so scrollers would never move.
+    static int s_lHeld, s_rHeld;
+    int lNow = (int)nat_call(g_base, OFF_IS_DISABLED_CONTROL_PRESSED, (uint64_t[]){0, CTRL_LEFT}, 2);
+    int rNow = (int)nat_call(g_base, OFF_IS_DISABLED_CONTROL_PRESSED, (uint64_t[]){0, CTRL_RIGHT}, 2);
+    int left  = lNow && !s_lHeld; s_lHeld = lNow;
+    int right = rNow && !s_rHeld; s_rHeld = rNow;
     int accept = ui_ctrl_just_dis(CTRL_ACCEPT);
     int cancel = ui_ctrl_just_dis(CTRL_CANCEL);
 
