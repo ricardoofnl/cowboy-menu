@@ -100,6 +100,22 @@ static const char *const WEATHER_NAMES[] = {
 static const uint32_t TACK[] = { 0xC10B5450u, 0x587DD49Fu, 0xC6C381F5u, 0x5277E9BAu, 0x508B80B9u, 0x9FD99D7Du };
 #define NTACK (sizeof(TACK) / sizeof(TACK[0]))
 
+// the wittemore (arthur's debauchery suit). shop-item component hashes from
+// femga/rdr3_discoveries cloth_hash_names.lua - SP male. vest+tie pick honor variants.
+static const uint32_t WITTEMORE_BLUE[] = {
+  0xEB679BBFu, // coat  - CLOTHING_SP_COAT_HEIST01_VARIATION_01
+  0x0E5E7EBCu, // pants - unnamed SP male
+  0x8112D739u, // boots - CLOTHING_ITEM_BOOTS_PZERO_002
+  0x5CB81FEBu, // vest  - CLOTHING_HL_PLAYER_VEST_010_1 (blue, high honor)
+  0xDF4A0DD2u, // tie   - necktie (blue)
+};
+static const uint32_t WITTEMORE_RED[] = {
+  0xEB679BBFu, 0x0E5E7EBCu, 0x8112D739u,
+  0x8117E8AAu, // vest - CLOTHING_HL_PLAYER_VEST_010_4 (red, low honor)
+  0x6743BFCBu, // tie  - CLOTHING_HL_PLAYER_NECKTIE_002_1 (red)
+};
+#define NWITTEMORE (sizeof(WITTEMORE_BLUE) / sizeof(WITTEMORE_BLUE[0]))
+
 // scroller state for the money / weather / time menus - exposed for config save/load
 int g_cfg_money_idx = 2, g_cfg_weather_idx = 0, g_cfg_hour = 12, g_cfg_minute = 0;
 #define s_money_idx g_cfg_money_idx
@@ -122,6 +138,9 @@ static void dual_wield_disable(void);
 static void take_all_weapons(void);
 static void self_kill(void);
 static void clean_player(void);
+static void outfit_page(void);
+static void equip_wittemore_blue(void);
+static void equip_wittemore_red(void);
 static void bonding_max(void);
 static void horse_shop(void);
 static void money_page(void);
@@ -222,6 +241,7 @@ static void player_page(void) {
   ui_toggle("Unlimited Stamina", &g_feat.unlimited_stamina);
   ui_toggle("Unlimited Deadeye", &g_feat.unlimited_deadeye);
   ui_toggle("Player Ignore", &g_feat.player_ignore);
+  ui_submenu("Outfits", outfit_page);
   ui_action("Clean Player", clean_player);
   ui_action("Self Kill", self_kill);
 }
@@ -574,6 +594,26 @@ static void clean_player(void) {
   nat_call(g_base, OFF__SET_PED_DAMAGE_CLEANLINESS, (uint64_t[]){(uint32_t)ped, 2}, 2);
   ui_notify("player cleaned");
 }
+
+// outfit page - wardrobe-style actions. each applies the shop-item components straight
+// onto the player ped (same flow the horse tack uses), then refreshes the variation.
+static void outfit_page(void) {
+  ui_title("Outfits");
+  ui_action("The Wittemore (High Honor)", equip_wittemore_blue);
+  ui_action("The Wittemore (Low Honor)",  equip_wittemore_red);
+}
+
+static void equip_wittemore(const uint32_t *comps) {
+  int ped = cur_ped(); if (!ped) return;
+  nat_call(g_base, OFF__REFRESH_META_PED_SHOP_ITEMS, (uint64_t[]){(uint32_t)ped, 1}, 2);
+  for (unsigned i = 0; i < NWITTEMORE; i++)
+    nat_call(g_base, OFF__APPLY_SHOP_ITEM_TO_PED, (uint64_t[]){(uint32_t)ped, comps[i], 1, 0, 0}, 5);
+  nat_call(g_base, OFF__UPDATE_PED_VARIATION, (uint64_t[]){(uint32_t)ped, 0, 1, 1, 1, 0}, 6);
+  nat_call(g_base, OFF__SET_ACTIVE_META_PED_COMPONENTS_UPDATED, (uint64_t[]){(uint32_t)ped, 0}, 2);
+  ui_notify("wittemore equipped");
+}
+static void equip_wittemore_blue(void) { equip_wittemore(WITTEMORE_BLUE); }
+static void equip_wittemore_red(void)  { equip_wittemore(WITTEMORE_RED); }
 
 static void self_kill(void) {
   int player = cur_player();
