@@ -23,8 +23,10 @@ typedef struct { float x; uint32_t _p0; float y; uint32_t _p1; float z; uint32_t
 // canonical rdr2 weapon joaat hashes (build-independent, from femga/rdr3_discoveries weapons.lua)
 static const uint32_t WEAPONS[] = {
   0x169F59F7u, // revolver cattleman
+  0x16D655F7u, // revolver cattleman mexican
   0x7BBD1FF6u, // revolver schofield
   0x0797FBF5u, // revolver double action
+  0x83DD5617u, // revolver double action gambler
   0x5B2D26B5u, // revolver lemat
   0x020D13FFu, // pistol volcanic
   0x657065D6u, // pistol semiauto
@@ -41,16 +43,25 @@ static const uint32_t WEAPONS[] = {
   0x53944780u, // sniper carcano
   0x31B7B9FEu, // shotgun pump
   0x6DFA071Bu, // shotgun doublebarrel
+  0x2250E150u, // shotgun doublebarrel exotic
   0x1765A8F8u, // shotgun sawedoff
   0x63CA782Au, // shotgun repeating
   0x6D9BB970u, // shotgun semiauto
   0x88A8505Cu, // bow
   0xD2718D48u, // throwing knives
   0xA5E972D7u, // tomahawk
+  0x7F23B6C7u, // tomahawk ancient
+  0x09E12A01u, // hatchet
+  0x2A5CF9D6u, // hatchet hunter
+  0xBCC63763u, // hatchet double bit
+  0xEF32A25Du, // cleaver
   0x28950C71u, // machete
   0xDB21AC8Cu, // knife
+  0x1086D041u, // knife jawbone
+  0x67DC3FDEu, // torch
   0x7067E7A7u, // molotov
   0xA64DAA5Eu, // dynamite
+  0x7A8A724Au, // lasso
 };
 #define NWEAPONS (sizeof(WEAPONS) / sizeof(WEAPONS[0]))
 
@@ -120,6 +131,59 @@ static int cur_ped(void) {
   if (!p) p = (int)nat_call(g_base, OFF_GET_PLAYER_PED, (uint64_t[]){0xFF}, 1);
   return p;
 }
+
+typedef struct {
+  int ped, god, stamina;
+} PedProtection;
+
+static PedProtection s_player_protection, s_horse_protection;
+static int s_god_player = -1;
+static int s_deadeye_player = -1;
+
+static int entity_exists(uint64_t base, int entity) {
+  return entity && (int)nat_call(base, OFF_DOES_ENTITY_EXIST, (uint64_t[]){(uint32_t)entity}, 1);
+}
+
+static void set_entity_god(uint64_t base, int ped, int on) {
+  nat_call(base, OFF_SET_ENTITY_INVINCIBLE, (uint64_t[]){(uint32_t)ped, on}, 2);
+  nat_call(base, OFF_SET_ENTITY_CAN_BE_DAMAGED, (uint64_t[]){(uint32_t)ped, !on}, 2);
+  nat_call(base, OFF_SET_ENTITY_PROOFS, (uint64_t[]){(uint32_t)ped, on ? 0xFFFFFFFFu : 0, on}, 3);
+}
+
+static void apply_ped_protection(uint64_t base, PedProtection *state, int ped, int god, int stamina) {
+  if (!entity_exists(base, ped)) ped = 0;
+  if (state->ped != ped) {
+    // undo persistent effects before moving to another entity
+    if (entity_exists(base, state->ped)) {
+      if (state->god) set_entity_god(base, state->ped, 0);
+      if (state->stamina)
+        nat_call(base, OFF_SET_PED_RESET_FLAG, (uint64_t[]){(uint32_t)state->ped, PRF_INFINITE_STAMINA, 0}, 3);
+    }
+    *state = (PedProtection){.ped = ped};
+  }
+  if (!ped) return;
+
+  if (god || state->god) set_entity_god(base, ped, god);
+  // reset flags expire each frame; this blocks stamina use without refilling it
+  if (stamina || state->stamina)
+    nat_call(base, OFF_SET_PED_RESET_FLAG, (uint64_t[]){(uint32_t)ped, PRF_INFINITE_STAMINA, stamina}, 3);
+  state->god = god;
+  state->stamina = stamina;
+}
+
+static void apply_player_protection(uint64_t base, int player, int ped) {
+  if (!entity_exists(base, ped)) ped = 0;
+  if (s_god_player >= 0 && (!g_feat.god || !ped || s_god_player != player)) {
+    nat_call(base, OFF_SET_PLAYER_INVINCIBLE, (uint64_t[]){(uint32_t)s_god_player, 0}, 2);
+    s_god_player = -1;
+  }
+  if (g_feat.god && ped) {
+    nat_call(base, OFF_SET_PLAYER_INVINCIBLE, (uint64_t[]){(uint32_t)player, 1}, 2);
+    s_god_player = player;
+  }
+  apply_ped_protection(base, &s_player_protection, ped, g_feat.god, g_feat.unlimited_stamina);
+}
+
 // ---- menu layout ----
 
 void features_build_root(void) {
@@ -184,18 +248,7 @@ void features_apply_all(uint64_t base) {
   int ped    = (int)nat_call(base, OFF_PLAYER_PED_ID, 0, 0);
   if (!ped) ped = (int)nat_call(base, OFF_GET_PLAYER_PED, (uint64_t[]){0xFF}, 1);
 
-  // god mode
-  if (g_feat.god) {
-    nat_call(base, OFF_SET_PLAYER_INVINCIBLE, (uint64_t[]){(uint32_t)player, 1}, 2);
-    nat_call(base, OFF_SET_ENTITY_INVINCIBLE, (uint64_t[]){(uint32_t)ped, 1}, 2);
-    nat_call(base, OFF_SET_ENTITY_CAN_BE_DAMAGED, (uint64_t[]){(uint32_t)ped, 0}, 2);
-    nat_call(base, OFF_SET_ENTITY_PROOFS, (uint64_t[]){(uint32_t)ped, 0xFFFFFFFF, 1}, 3); // VERIFY proof arg form
-  } else if (prev.god) {
-    nat_call(base, OFF_SET_PLAYER_INVINCIBLE, (uint64_t[]){(uint32_t)player, 0}, 2);
-    nat_call(base, OFF_SET_ENTITY_INVINCIBLE, (uint64_t[]){(uint32_t)ped, 0}, 2);
-    nat_call(base, OFF_SET_ENTITY_CAN_BE_DAMAGED, (uint64_t[]){(uint32_t)ped, 1}, 2);
-    nat_call(base, OFF_SET_ENTITY_PROOFS, (uint64_t[]){(uint32_t)ped, 0, 0}, 3);
-  }
+  apply_player_protection(base, player, ped);
 
   // remove satchel - self-limiting strip chain, gated on the component check
   if (g_feat.no_satchel && ped &&
@@ -241,18 +294,20 @@ void features_apply_all(uint64_t base) {
   if (g_feat.slow_motion)     nat_call(base, OFF_SET_TIME_SCALE, (uint64_t[]){fu(0.3f)}, 1);
   else if (prev.slow_motion)  nat_call(base, OFF_SET_TIME_SCALE, (uint64_t[]){fu(1.0f)}, 1);
 
-  // unlimited stamina
-  if (g_feat.unlimited_stamina) {
-    nat_call(base, OFF_RESTORE_PLAYER_STAMINA, (uint64_t[]){(uint32_t)player, fu(1.0f)}, 2);
-    nat_call(base, OFF__SET_ATTRIBUTE_CORE_VALUE, (uint64_t[]){(uint32_t)ped, 1, 100}, 3); // VERIFY core 1=stamina
-  }
-
-  // unlimited deadeye - top up outer ring + pin core
-  if (g_feat.unlimited_deadeye) {
-    union { float f; uint32_t u; } mx;
-    mx.u = (uint32_t)nat_call(base, OFF__GET_PLAYER_MAX_DEAD_EYE, (uint64_t[]){(uint32_t)player}, 1);
-    nat_call(base, OFF__SPECIAL_ABILITY_RESTORE_OUTER_RING, (uint64_t[]){(uint32_t)player, (uint64_t)mx.u}, 2); // VERIFY args
-    nat_call(base, OFF__SET_ATTRIBUTE_CORE_VALUE, (uint64_t[]){(uint32_t)ped, 2, 100}, 3); // VERIFY core 2=deadeye
+  // unlimited deadeye - _MODIFY_INFINITE_TRAIL_VISION blocks drain on both deadeye and
+  // eagle eye like the engine's own cheat does. persist flag is on the player so it only
+  // needs an edge call; pin the core each frame so the gauge reads full.
+  if (g_feat.unlimited_deadeye && ped) {
+    if (s_deadeye_player >= 0 && s_deadeye_player != player)
+      nat_call(base, OFF__MODIFY_INFINITE_TRAIL_VISION, (uint64_t[]){(uint32_t)s_deadeye_player, 0}, 2); // release old player
+    if (s_deadeye_player != player) {
+      nat_call(base, OFF__MODIFY_INFINITE_TRAIL_VISION, (uint64_t[]){(uint32_t)player, 1}, 2);
+      s_deadeye_player = player;
+    }
+    nat_call(base, OFF__SET_ATTRIBUTE_CORE_VALUE, (uint64_t[]){(uint32_t)ped, 2, 100}, 3); // core 2 = deadeye
+  } else if (s_deadeye_player >= 0) {
+    nat_call(base, OFF__MODIFY_INFINITE_TRAIL_VISION, (uint64_t[]){(uint32_t)s_deadeye_player, 0}, 2);
+    s_deadeye_player = -1;
   }
 
   // player ignore
@@ -337,34 +392,17 @@ void features_apply_all(uint64_t base) {
       (int)nat_call(base, OFF_IS_PED_ON_MOUNT, (uint64_t[]){(uint32_t)ped}, 1)) {
     mount = (int)nat_call(base, OFF_GET_MOUNT, (uint64_t[]){(uint32_t)ped}, 1);
   }
+  int protectedHorse = mount;
+  if (!protectedHorse && ped && (g_feat.horse_god || g_feat.horse_unlimited_stamina)) {
+    // keep the last horse protected after dismounting
+    protectedHorse = s_horse_protection.ped;
+    if (!entity_exists(base, protectedHorse))
+      protectedHorse = (int)nat_call(base, OFF__GET_SADDLE_HORSE_FOR_PLAYER, (uint64_t[]){(uint32_t)player}, 1);
+  }
+  apply_ped_protection(base, &s_horse_protection, protectedHorse,
+                       g_feat.horse_god, g_feat.horse_unlimited_stamina);
+
   if (mount) {
-    // unlimited stamina - the core write alone never touched the gallop-draining BAR; overpower
-    // the stamina core (idx 1) so it stops draining.
-    if (g_feat.horse_unlimited_stamina) {
-      nat_call(base, OFF__SET_ATTRIBUTE_CORE_VALUE, (uint64_t[]){(uint32_t)mount, 1, 100}, 3);
-      nat_call(base, OFF__ENABLE_ATTRIBUTE_CORE_OVERPOWER, (uint64_t[]){(uint32_t)mount, 1, fu(100.0f), 0}, 4);
-      // the overpower core only refills the reservoir - the gallop drains the stamina BAR, so top
-      // the bar itself every frame. that is what makes it truly unlimited (not just a one-shot tonic).
-      union { float f; uint32_t u; } cur, mx;
-      cur.u = (uint32_t)nat_call(base, OFF__GET_PED_STAMINA,     (uint64_t[]){(uint32_t)mount}, 1);
-      mx.u  = (uint32_t)nat_call(base, OFF__GET_PED_MAX_STAMINA, (uint64_t[]){(uint32_t)mount}, 1);
-      if (mx.f > cur.f) nat_call(base, OFF__CHANGE_PED_STAMINA, (uint64_t[]){(uint32_t)mount, fu(mx.f - cur.f)}, 2);
-    } else if (prev.horse_unlimited_stamina) {
-      nat_call(base, OFF__ENABLE_ATTRIBUTE_CORE_OVERPOWER, (uint64_t[]){(uint32_t)mount, 1, fu(0.0f), 0}, 4);
-    }
-
-    // god mode - block damage both ways, keep health core full, guard the bar restore
-    if (g_feat.horse_god) {
-      nat_call(base, OFF_SET_ENTITY_INVINCIBLE, (uint64_t[]){(uint32_t)mount, 1}, 2);
-      nat_call(base, OFF_SET_ENTITY_CAN_BE_DAMAGED, (uint64_t[]){(uint32_t)mount, 0}, 2);
-      nat_call(base, OFF__SET_ATTRIBUTE_CORE_VALUE, (uint64_t[]){(uint32_t)mount, 0, 100}, 3);
-      int mh = (int)nat_call(base, OFF_GET_ENTITY_MAX_HEALTH, (uint64_t[]){(uint32_t)mount, 0}, 2);
-      if (mh > 0) nat_call(base, OFF_SET_ENTITY_HEALTH, (uint64_t[]){(uint32_t)mount, (uint32_t)mh, 0}, 3);
-    } else if (prev.horse_god) {
-      nat_call(base, OFF_SET_ENTITY_INVINCIBLE, (uint64_t[]){(uint32_t)mount, 0}, 2);
-      nat_call(base, OFF_SET_ENTITY_CAN_BE_DAMAGED, (uint64_t[]){(uint32_t)mount, 1}, 2);
-    }
-
     // invisibility - SET_ENTITY_VISIBLE(false) cascades to the attached rider and hides the player;
     // alpha fades only the mount's own drawables, so the rider stays visible.
     if (g_feat.horse_invisible)       nat_call(base, OFF_SET_ENTITY_ALPHA, (uint64_t[]){(uint32_t)mount, 0, 0}, 3);
@@ -514,13 +552,8 @@ static void self_kill(void) {
   int player = cur_player();
   int ped = cur_ped(); if (!ped) return;
   // drop god first or the damage won't register
-  if (g_feat.god) {
-    g_feat.god = 0;
-    nat_call(g_base, OFF_SET_PLAYER_INVINCIBLE, (uint64_t[]){(uint32_t)player, 0}, 2);
-    nat_call(g_base, OFF_SET_ENTITY_INVINCIBLE, (uint64_t[]){(uint32_t)ped, 0}, 2);
-    nat_call(g_base, OFF_SET_ENTITY_CAN_BE_DAMAGED, (uint64_t[]){(uint32_t)ped, 1}, 2);
-    nat_call(g_base, OFF_SET_ENTITY_PROOFS, (uint64_t[]){(uint32_t)ped, 0, 0}, 3);
-  }
+  g_feat.god = 0;
+  apply_player_protection(g_base, player, ped);
   nat_call(g_base, OFF_APPLY_DAMAGE_TO_PED, (uint64_t[]){(uint32_t)ped, 10000, 1, 0, (uint32_t)ped}, 5);
   nat_call(g_base, OFF_SET_ENTITY_HEALTH, (uint64_t[]){(uint32_t)ped, 0, 0}, 3);
 }
@@ -581,7 +614,7 @@ static void worldtime_page(void) {
   ui_scroll_opt("Weather", &s_weather_idx, WEATHER_NAMES, (int)NWEATHER);
   ui_action("Apply Weather", apply_weather);
   ui_scroll_int("Hour", &s_hour, 0, 23, 1);
-  ui_scroll_int("Minute", &s_minute, 0, 59, 5);
+  ui_scroll_int("Minute", &s_minute, 0, 59, 1);
   ui_action("Apply Time", apply_time);
   ui_toggle("Freeze Time", &g_feat.freeze_time);
 }

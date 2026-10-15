@@ -8,4 +8,4 @@ build/
 *.elf
 *.oelf
 tasks/
-.DS_Store
+.DS_Storeopencode.json

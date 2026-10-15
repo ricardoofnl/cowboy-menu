@@ -15,6 +15,8 @@ CFLAGS  := --target=x86_64-pc-freebsd12-elf -fPIC -funwind-tables -c -O2 \
 LDFLAGS := -m elf_x86_64 -pie --script $(TOOLCHAIN)/link.x -e _init --eh-frame-hdr \
            -L$(TOOLCHAIN)/lib $(LIBS)
 CRTPRX  := $(TOOLCHAIN)/lib/crtprx.o
+HOST_CC ?= cc
+DOCKER_IMAGE ?= cowboy-menu-build
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -43,4 +45,18 @@ $(TARGET): $(OBJS)
 clean:
 	rm -rf $(INTDIR) $(TARGET)
 
-.PHONY: all clean
+test: | $(INTDIR)
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror tests/protection.c -o $(INTDIR)/protection_test
+	./$(INTDIR)/protection_test
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror tests/ui_selectors.c -o $(INTDIR)/ui_selectors_test
+	./$(INTDIR)/ui_selectors_test
+
+docker:
+	docker build --platform linux/amd64 -t $(DOCKER_IMAGE) .
+	docker run --rm --platform linux/amd64 --network none \
+	  --user "$(shell id -u):$(shell id -g)" \
+	  --mount 'type=bind,src=$(CURDIR),dst=/workspace' $(DOCKER_IMAGE)
+	mkdir -p dist
+	cp $(TARGET) dist/$(TARGET)
+
+.PHONY: all clean test docker

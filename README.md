@@ -4,6 +4,11 @@ A GoldHEN mod menu plugin for Red Dead Redemption 2 on PS4 (`CUSA08519`, game 1.
 Open the menu in game with `R1 + O`. Built on the same verified native-call base as the
 satchel-remover project.
 
+Use D-pad up/down to select a row, left/right to change a value, and X to select or
+cycle a value. O goes back. Money, weather, hour and minute selectors show the current
+value in square brackets. After choosing a value, select Add/Remove Money, Apply Weather
+or Apply Time to apply it.
+
 ## Menus
 
 ### Player
@@ -24,15 +29,33 @@ satchel-remover project.
 
 ## How it works
 
-The plugin resolves the running eboot base and calls RDR2 native handlers directly (located
-by scanning the eboot for each native's 64-bit hash). Toggles are re-applied every frame from
-a hooked game-thread tick; actions fire once on selection.
+The plugin resolves the running eboot base and calls RDR2 native handlers at offsets verified
+by scanning the 1.32 eboot for each native's 64-bit hash. A hooked game-thread tick applies
+toggles; actions fire once on selection.
+
+Unlimited stamina uses the engine's `InfiniteStamina` reset flag for both player and horse.
+The flag is renewed each frame without refilling cores or stamina bars. Unlimited deadeye
+uses `_MODIFY_INFINITE_TRAIL_VISION` (the same switch the built-in cheat phrase flips) plus
+a core pin so the gauge stays full; it releases on toggle off. God mode blocks
+damage through invincibility and entity proofs without repeatedly restoring health.
+Horse protection follows the current mount, stays on that horse after dismounting, and falls
+back to the saddle horse when no previous horse is available. Switching horses or disabling
+the toggles clears protection from the previous horse.
 
 ## Building
 
-Built in CI (GitHub Actions) with the OpenOrbis toolchain and the GoldHEN SDK, which produces
-`cowboy_menu.prx` as a build artifact. The `release` workflow cuts a tagged release with the
-prx attached, taking a version input.
+With Docker running, build the plugin and run regression tests locally:
+
+```sh
+make docker
+```
+
+This prepares an amd64 OpenOrbis + GoldHEN build image, including on Apple Silicon, then
+writes `dist/cowboy_menu.prx`. The first build downloads the toolchain; later builds reuse
+the image cache. The compiler runs in a container with networking disabled.
+
+The GitHub Actions `build` workflow also produces `cowboy_menu.prx` as an artifact.
+The `release` workflow cuts a tagged release with the prx attached, taking a version input.
 
 ## Install
 

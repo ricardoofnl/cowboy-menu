@@ -3,6 +3,7 @@
 #include "natives.h"
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 // ---- native arg packing helpers -------------------------------------------
 #define UI_PTR(p) ((uint64_t)(uintptr_t)(p))
@@ -25,13 +26,31 @@ static void ui_draw_rect(float x, float y, float w, float h,
     nat_call(g_base, OFF_DRAW_RECT, s, 10);
 }
 
+static void ui_escape_text(char *out, size_t capacity, const char *text) {
+    size_t used = 0;
+    if (!capacity) return;
+    for (; *text; text++) {
+        const char *escaped = 0;
+        if (*text == '&') escaped = "&amp;";
+        else if (*text == '<') escaped = "&lt;";
+        else if (*text == '>') escaped = "&gt;";
+        size_t len = escaped ? strlen(escaped) : 1;
+        if (len >= capacity - used) break;
+        memcpy(out + used, escaped ? escaped : text, len);
+        used += len;
+    }
+    out[used] = '\0';
+}
+
 static void ui_draw_text(const char *text, float x, float y, int size,
                          const char *face, const char *hex, const char *align) {
-    char buf[512];
+    char escaped[512], buf[768];
+    // scaleform treats raw angle brackets as tags and hides selector values
+    ui_escape_text(escaped, sizeof escaped, text);
     snprintf(buf, sizeof buf,
         "<TEXTFORMAT INDENT='0' LEFTMARGIN='0' RIGHTMARGIN='0' LEADING='0'>"
         "<FONT FACE='$%s' COLOR='#%s' SIZE='%d'><P ALIGN='%s'>%s</P></FONT></TEXTFORMAT>",
-        face, hex, size, align, text);
+        face, hex, size, align, escaped);
 
     // same two-step wrap the base uses: literal -> color string -> submit
     uint64_t a1[3] = { 10, UI_PTR("LITERAL_STRING"), UI_PTR(buf) };
@@ -223,15 +242,13 @@ static void ui_draw(void) {
         const char *hex = hot ? "1A1206" : "D8C9A8";
         float ty = cy - 0.012f;
         ui_item *it = &s_items[i];
-        // scrollers: draw the value INTO the label text (one left-aligned string) so it always
-        // shows next to the label; X or left/right change it.
         if (it->kind == UI_SCROLL_INT) {
-            char lb[96]; snprintf(lb, sizeof lb, "%s:  < %d >", it->label, it->state ? *it->state : 0);
+            char lb[96]; snprintf(lb, sizeof lb, "%s:  [ %d ]", it->label, it->state ? *it->state : 0);
             ui_draw_text(lb, textL + dx, ty, 22, "body", hex, "LEFT");
         } else if (it->kind == UI_SCROLL_OPT) {
             const char *v = (it->state && it->opts && *it->state >= 0 && *it->state < it->nopts)
                             ? it->opts[*it->state] : "";
-            char lb[96]; snprintf(lb, sizeof lb, "%s:  < %s >", it->label, v);
+            char lb[96]; snprintf(lb, sizeof lb, "%s:  [ %s ]", it->label, v);
             ui_draw_text(lb, textL + dx, ty, 22, "body", hex, "LEFT");
         } else {
             ui_draw_text(it->label, textL + dx, ty, 22, "body", hex, "LEFT");
@@ -241,6 +258,15 @@ static void ui_draw(void) {
                 ui_draw_text(">", textL + dx + 0.185f, ty, 22, "body", hex, "LEFT");
         }
     }
+
+    const ui_item *selected = &s_items[s_cursor];
+    int scroller = selected->kind == UI_SCROLL_INT || selected->kind == UI_SCROLL_OPT;
+    float helpY = firstRowY + (s_itemCount - 0.5f) * rowH + 0.006f;
+    ui_draw_rect(MX + dx, helpY + 0.027f, MW, 0.054f, 18, 14, 10, 235);
+    ui_draw_text(scroller ? "D-pad Left / Right: change" : "D-pad Up / Down: navigate",
+                 textL + dx, helpY + 0.003f, 16, "body", "E8D9B8", "LEFT");
+    ui_draw_text(scroller ? "X: next value    O: back" : "X: select    O: back",
+                 textL + dx, helpY + 0.026f, 16, "body", "E8D9B8", "LEFT");
 
     // toast at the bottom-center (toggles + action messages via ui_notify)
     if (s_noteTimer > 0 && s_noteMsg[0]) {
