@@ -583,14 +583,21 @@ static void dual_wield_enable(void)  { int ped = cur_ped(); if (ped) nat_call(g_
 static void dual_wield_disable(void) { int ped = cur_ped(); if (ped) nat_call(g_base, OFF__SET_ALLOW_DUAL_WIELD, (uint64_t[]){(uint32_t)ped, 0}, 2); }
 static void take_all_weapons(void)   { int ped = cur_ped(); if (ped) nat_call(g_base, OFF_REMOVE_ALL_PED_WEAPONS, (uint64_t[]){(uint32_t)ped, 1, 1}, 3); }
 
-// wipes dirt, blood (body + face), bullet wounds and wetness off the player ped.
-// zone 0 covers all blood zones; cleanliness 2 = pristine (0/1 show bruises/scratches).
+// wipes dirt, blood (body + face), wound decals and wetness off the player ped.
+// same chain the game's own bathing script runs (bathing.c): env dirt + decal zones +
+// blood damage + the _SET_PED_DIRT_CLEANED finisher which is what actually scrubs clothes.
 static void clean_player(void) {
   int ped = cur_ped(); if (!ped) return;
+  nat_call(g_base, OFF_CLEAR_PED_ENV_DIRT, (uint64_t[]){(uint32_t)ped}, 1);
+  nat_call(g_base, OFF_CLEAR_PED_DAMAGE_DECAL_BY_ZONE,
+           (uint64_t[]){(uint32_t)ped, 10, (uint64_t)(uintptr_t)"ALL"}, 3);
   nat_call(g_base, OFF_CLEAR_PED_BLOOD_DAMAGE, (uint64_t[]){(uint32_t)ped}, 1);
   nat_call(g_base, OFF__CLEAR_PED_BLOOD_DAMAGE_FACIAL, (uint64_t[]){(uint32_t)ped, 0}, 2);
-  nat_call(g_base, OFF_CLEAR_PED_ENV_DIRT, (uint64_t[]){(uint32_t)ped}, 1);
+  // per-zone scrub for the zones CLEAR_PED_BLOOD_DAMAGE can miss (face/hands/legs)
+  for (uint32_t z = 0; z < 10; z++)
+    nat_call(g_base, OFF_CLEAR_PED_BLOOD_DAMAGE_BY_ZONE, (uint64_t[]){(uint32_t)ped, z}, 2);
   nat_call(g_base, OFF_CLEAR_PED_WETNESS, (uint64_t[]){(uint32_t)ped}, 1);
+  nat_call(g_base, OFF__SET_PED_DIRT_CLEANED, (uint64_t[]){(uint32_t)ped, fu(0.0f), (uint64_t)-1, 1, 1}, 5);
   nat_call(g_base, OFF__SET_PED_DAMAGE_CLEANLINESS, (uint64_t[]){(uint32_t)ped, 2}, 2);
   ui_notify("player cleaned");
 }
