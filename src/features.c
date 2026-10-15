@@ -104,13 +104,14 @@ static const uint32_t TACK[] = { 0xC10B5450u, 0x587DD49Fu, 0xC6C381F5u, 0x5277E9
 // femga/rdr3_discoveries cloth_hash_names.lua - SP male. vest+tie pick honor variants.
 static const uint32_t WITTEMORE_BLUE[] = {
   0xEB679BBFu, // coat  - CLOTHING_SP_COAT_HEIST01_VARIATION_01
+  0x91B2F27Bu, // shirt - CLOTHING_SP_SHIRT_FANCY01_VARIATION_01 (same fancy set, no clip)
   0x0E5E7EBCu, // pants - unnamed SP male
   0x8112D739u, // boots - CLOTHING_ITEM_BOOTS_PZERO_002
   0x5CB81FEBu, // vest  - CLOTHING_HL_PLAYER_VEST_010_1 (blue, high honor)
   0xDF4A0DD2u, // tie   - necktie (blue)
 };
 static const uint32_t WITTEMORE_RED[] = {
-  0xEB679BBFu, 0x0E5E7EBCu, 0x8112D739u,
+  0xEB679BBFu, 0x91B2F27Bu, 0x0E5E7EBCu, 0x8112D739u,
   0x8117E8AAu, // vest - CLOTHING_HL_PLAYER_VEST_010_4 (red, low honor)
   0x6743BFCBu, // tie  - CLOTHING_HL_PLAYER_NECKTIE_002_1 (red)
 };
@@ -613,9 +614,6 @@ static void outfit_page(void) {
 static void equip_wittemore(const uint32_t *comps) {
   int ped = cur_ped(); if (!ped) return;
   nat_call(g_base, OFF__REFRESH_META_PED_SHOP_ITEMS, (uint64_t[]){(uint32_t)ped, 1}, 2);
-  // strip the current shirt first - it clips through the heist coat otherwise
-  nat_call(g_base, OFF_REMOVE_SHOP_ITEM_FROM_PED_BY_CATEGORY,
-           (uint64_t[]){(uint32_t)ped, HASH_SHIRTS_FULL, 0, 0}, 4);
   for (unsigned i = 0; i < NWITTEMORE; i++)
     nat_call(g_base, OFF__APPLY_SHOP_ITEM_TO_PED, (uint64_t[]){(uint32_t)ped, comps[i], 1, 0, 0}, 5);
   nat_call(g_base, OFF__UPDATE_PED_VARIATION, (uint64_t[]){(uint32_t)ped, 0, 1, 1, 1, 0}, 6);
