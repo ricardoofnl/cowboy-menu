@@ -613,6 +613,9 @@ static void outfit_page(void) {
 static void equip_wittemore(const uint32_t *comps) {
   int ped = cur_ped(); if (!ped) return;
   nat_call(g_base, OFF__REFRESH_META_PED_SHOP_ITEMS, (uint64_t[]){(uint32_t)ped, 1}, 2);
+  // strip the current shirt first - it clips through the heist coat otherwise
+  nat_call(g_base, OFF_REMOVE_SHOP_ITEM_FROM_PED_BY_CATEGORY,
+           (uint64_t[]){(uint32_t)ped, HASH_SHIRTS_FULL, 0, 0}, 4);
   for (unsigned i = 0; i < NWITTEMORE; i++)
     nat_call(g_base, OFF__APPLY_SHOP_ITEM_TO_PED, (uint64_t[]){(uint32_t)ped, comps[i], 1, 0, 0}, 5);
   nat_call(g_base, OFF__UPDATE_PED_VARIATION, (uint64_t[]){(uint32_t)ped, 0, 1, 1, 1, 0}, 6);

@@ -10,6 +10,7 @@
 
 // metaped category hash (joaat "satchels")
 #define HASH_SATCHELS 0x94504D26u
+#define HASH_SHIRTS_FULL 0x2026C46Du  // metaped category "shirts_full"
 
 // control-index hashes (passed as native args, not handler lookups)
 #define CTRL_RB     0x17BEC168u
