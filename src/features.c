@@ -4,6 +4,7 @@
 #include "natives.h"
 #include "ui.h"
 #include "features.h"
+#include "config.h"
 
 FeatureState g_feat = {0};
 
@@ -99,8 +100,12 @@ static const char *const WEATHER_NAMES[] = {
 static const uint32_t TACK[] = { 0xC10B5450u, 0x587DD49Fu, 0xC6C381F5u, 0x5277E9BAu, 0x508B80B9u, 0x9FD99D7Du };
 #define NTACK (sizeof(TACK) / sizeof(TACK[0]))
 
-// scroller state for the money / weather / time menus
-static int s_money_idx = 2, s_weather_idx = 0, s_hour = 12, s_minute = 0;
+// scroller state for the money / weather / time menus - exposed for config save/load
+int g_cfg_money_idx = 2, g_cfg_weather_idx = 0, g_cfg_hour = 12, g_cfg_minute = 0;
+#define s_money_idx g_cfg_money_idx
+#define s_weather_idx g_cfg_weather_idx
+#define s_hour g_cfg_hour
+#define s_minute g_cfg_minute
 
 // forward decls
 static void player_page(void);
@@ -120,6 +125,7 @@ static void bonding_max(void);
 static void horse_shop(void);
 static void money_page(void);
 static void worldtime_page(void);
+static void settings_page(void);
 static void money_add(void);
 static void money_remove(void);
 static void apply_weather(void);
@@ -193,6 +199,13 @@ void features_build_root(void) {
   ui_submenu("Horse Options", horse_page);
   ui_submenu("Money", money_page);
   ui_submenu("Weather & Time", worldtime_page);
+  ui_submenu("Settings", settings_page);
+}
+
+static void settings_page(void) {
+  ui_title("Settings");
+  ui_action("Save Config", config_save);
+  ui_action("Delete Config", config_delete);
 }
 
 static void player_page(void) {

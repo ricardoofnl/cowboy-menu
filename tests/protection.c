@@ -218,3 +218,8 @@ void ui_scroll_opt(const char *label, int *idx, const char *const *opts, int cou
   (void)label; (void)idx; (void)opts; (void)count;
 }
 void ui_notify(const char *msg) { (void)msg; }
+
+// config stubs - persistence is file-based on console, no-op in tests
+void config_save(void) {}
+void config_delete(void) {}
+void config_load(void) {}

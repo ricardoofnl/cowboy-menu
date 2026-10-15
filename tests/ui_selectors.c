@@ -143,3 +143,8 @@ int main(void) {
     puts("ui selector regression tests passed");
     return 0;
 }
+
+// config stubs - persistence is file-based on console, no-op in tests
+void config_save(void) {}
+void config_delete(void) {}
+void config_load(void) {}

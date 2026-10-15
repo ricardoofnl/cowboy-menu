@@ -50,6 +50,8 @@ test: | $(INTDIR)
 	./$(INTDIR)/protection_test
 	$(HOST_CC) -std=c11 -Wall -Wextra -Werror tests/ui_selectors.c -o $(INTDIR)/ui_selectors_test
 	./$(INTDIR)/ui_selectors_test
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror tests/config.c -o $(INTDIR)/config_test
+	./$(INTDIR)/config_test
 
 docker:
 	docker build --platform linux/amd64 -t $(DOCKER_IMAGE) .

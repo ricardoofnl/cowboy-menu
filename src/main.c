@@ -3,6 +3,7 @@
 #include "natives.h"
 #include "ui.h"
 #include "features.h"
+#include "config.h"
 
 #ifndef attr_public
 #define attr_public __attribute__((visibility("default")))
@@ -44,6 +45,7 @@ int32_t module_start(size_t argc, const void *args) {
 
     g_base = pi.base_address;
     ui_set_root(features_build_root);
+    config_load();   // restore saved toggles before the first tick
 
     Detour_Construct(&g_detour, DetourMode_x64);
     Detour_DetourFunction(&g_detour, g_base + OFF_GET_PLAYER_PED, (void *)hk_tick);
