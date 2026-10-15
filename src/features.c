@@ -121,6 +121,7 @@ static void dual_wield_enable(void);
 static void dual_wield_disable(void);
 static void take_all_weapons(void);
 static void self_kill(void);
+static void clean_player(void);
 static void bonding_max(void);
 static void horse_shop(void);
 static void money_page(void);
@@ -221,6 +222,7 @@ static void player_page(void) {
   ui_toggle("Unlimited Stamina", &g_feat.unlimited_stamina);
   ui_toggle("Unlimited Deadeye", &g_feat.unlimited_deadeye);
   ui_toggle("Player Ignore", &g_feat.player_ignore);
+  ui_action("Clean Player", clean_player);
   ui_action("Self Kill", self_kill);
 }
 
@@ -560,6 +562,18 @@ static void equip_best_weapons(void) {
 static void dual_wield_enable(void)  { int ped = cur_ped(); if (ped) nat_call(g_base, OFF__SET_ALLOW_DUAL_WIELD, (uint64_t[]){(uint32_t)ped, 1}, 2); }
 static void dual_wield_disable(void) { int ped = cur_ped(); if (ped) nat_call(g_base, OFF__SET_ALLOW_DUAL_WIELD, (uint64_t[]){(uint32_t)ped, 0}, 2); }
 static void take_all_weapons(void)   { int ped = cur_ped(); if (ped) nat_call(g_base, OFF_REMOVE_ALL_PED_WEAPONS, (uint64_t[]){(uint32_t)ped, 1, 1}, 3); }
+
+// wipes dirt, blood (body + face), bullet wounds and wetness off the player ped.
+// zone 0 covers all blood zones; cleanliness 2 = pristine (0/1 show bruises/scratches).
+static void clean_player(void) {
+  int ped = cur_ped(); if (!ped) return;
+  nat_call(g_base, OFF_CLEAR_PED_BLOOD_DAMAGE, (uint64_t[]){(uint32_t)ped}, 1);
+  nat_call(g_base, OFF__CLEAR_PED_BLOOD_DAMAGE_FACIAL, (uint64_t[]){(uint32_t)ped, 0}, 2);
+  nat_call(g_base, OFF_CLEAR_PED_ENV_DIRT, (uint64_t[]){(uint32_t)ped}, 1);
+  nat_call(g_base, OFF_CLEAR_PED_WETNESS, (uint64_t[]){(uint32_t)ped}, 1);
+  nat_call(g_base, OFF__SET_PED_DAMAGE_CLEANLINESS, (uint64_t[]){(uint32_t)ped, 2}, 2);
+  ui_notify("player cleaned");
+}
 
 static void self_kill(void) {
   int player = cur_player();
