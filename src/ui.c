@@ -95,6 +95,8 @@ typedef struct {
     int                lo, hi, step; // UI_SCROLL_INT bounds
     const char *const *opts;         // UI_SCROLL_OPT labels
     int                nopts;
+    void             (*apply)(int id);
+    int                apply_id;
 } ui_item;
 
 #define UI_MAX_ITEMS 32
@@ -165,6 +167,7 @@ static ui_item *ui_push(int kind, const char *label) {
     it->kind = kind; it->label = label;
     it->state = 0; it->page = 0; it->fn = 0;
     it->lo = it->hi = it->step = 0; it->opts = 0; it->nopts = 0;
+    it->apply = 0; it->apply_id = 0;
     return it;
 }
 void ui_toggle(const char *label, int *state) {
@@ -183,6 +186,14 @@ void ui_scroll_int(const char *label, int *val, int lo, int hi, int step) {
 void ui_scroll_opt(const char *label, int *idx, const char *const *opts, int count) {
     ui_item *it = ui_push(UI_SCROLL_OPT, label);
     if (it) { it->state = idx; it->opts = opts; it->nopts = count; }
+}
+void ui_scroll_opt_apply(const char *label, int *idx, const char *const *opts, int count,
+                         void (*apply)(int id), int id) {
+    ui_item *it = ui_push(UI_SCROLL_OPT, label);
+    if (it) {
+        it->state = idx; it->opts = opts; it->nopts = count;
+        it->apply = apply; it->apply_id = id;
+    }
 }
 void ui_notify(const char *msg) {
     snprintf(s_noteMsg, sizeof s_noteMsg, "%s", msg ? msg : "");
@@ -339,6 +350,7 @@ void ui_tick(void) {
             ui_sound("NAV_LEFT");
         } else if (it->kind == UI_SCROLL_OPT && it->state && it->nopts > 0) {
             *it->state = (*it->state + (right ? 1 : -1) + it->nopts) % it->nopts;
+            if (it->apply) it->apply(it->apply_id);
             ui_sound("NAV_LEFT");
         }
     }
@@ -371,7 +383,10 @@ void ui_tick(void) {
             if (it->state) { *it->state += it->step; if (*it->state > it->hi) *it->state = it->lo; }
             ui_sound("SELECT");
         } else if (it->kind == UI_SCROLL_OPT) {
-            if (it->state && it->nopts > 0) *it->state = (*it->state + 1) % it->nopts;
+            if (it->state && it->nopts > 0) {
+                *it->state = (*it->state + 1) % it->nopts;
+                if (it->apply) it->apply(it->apply_id);
+            }
             ui_sound("SELECT");
         }
     }

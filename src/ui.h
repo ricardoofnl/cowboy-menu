@@ -22,6 +22,8 @@ void ui_submenu(const char *label, void (*page)(void)); // ACCEPT pushes page
 void ui_action(const char *label, void (*fn)(void));    // ACCEPT calls fn (and shows a toast)
 void ui_scroll_int(const char *label, int *val, int lo, int hi, int step); // LEFT/RIGHT adjust
 void ui_scroll_opt(const char *label, int *idx, const char *const *opts, int count); // LEFT/RIGHT cycle
+void ui_scroll_opt_apply(const char *label, int *idx, const char *const *opts, int count,
+                         void (*apply)(int id), int id); // X/LEFT/RIGHT cycle and apply
 
 // show a toast for ~2.5s (actions call this for messages like "all weapons given")
 void ui_notify(const char *msg);

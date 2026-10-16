@@ -3,10 +3,8 @@
 
 static const uint32_t OF_HATS[] = {
   0xC2F59087u, // unnamed
-  0xD1F44584u, // CLOTHING_SP_CHINESE_LABOR_HAT_000_1
-  0xA53EAF6Du, // CLOTHING_SP_CIVIL_WAR_HAT_000_1
-  0x17FF42D8u, // CLOTHING_SP_CONQUISTADOR_HAT_000_1
-  0xE83908D5u, // CLOTHING_SP_DEAD_MINER_HAT_000_1
+  0x3296ADD6u, // CLOTHING_HAT_000_POLICE
+  0x054442A0u, // CLOTHING_HAT_GRIZZLED_JON
   0xA7E79553u, // CLOTHING_HL_PLAYER_HAT_000_000_1
   0x971306DEu, // CLOTHING_HL_PLAYER_HAT_000_001_1
   0x66DA1DF4u, // CLOTHING_HL_PLAYER_HAT_000_002_1
@@ -19,7 +17,6 @@ static const uint32_t OF_HATS[] = {
   0x9C77E68Du, // CLOTHING_HL_PLAYER_HAT_000_009_1
   0xC3A3D2B5u, // CLOTHING_HL_PLAYER_HAT_000_010_1
   0x986E0F1Bu, // CLOTHING_HL_PLAYER_HAT_000_011_1
-  0x3296ADD6u, // CLOTHING_HAT_000_POLICE
   0x13929FE4u, // CLOTHING_HL_PLAYER_HAT_002_10
   0x8D8846C6u, // CLOTHING_HL_PLAYER_HAT_002_2
   0x367C98A4u, // CLOTHING_HL_PLAYER_HAT_002_3
@@ -276,73 +273,74 @@ static const uint32_t OF_HATS[] = {
   0x50BE4FDCu, // CLOTHING_HL_PLAYER_HAT_071_1
   0x1E55237Du, // CLOTHING_HL_PLAYER_HAT_072_1
   0x06E86861u, // CLOTHING_HL_PLAYER_HAT_073_1
-  0x054442A0u, // CLOTHING_HAT_GRIZZLED_JON
   0xA479E260u, // CLOTHING_ITEM_HAT_PZERO_000
+  0x18BEFAB4u, // CLOTHING_ITEM_PZ_HAT_PIRATE_01
+  0x73968A7Eu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_000
+  0xCA2FAA11u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_002_ALT02
+  0x0BF0BB3Cu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_004
+  0xFAAC18B3u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_005
+  0xD6E57DB5u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_006_ALT02
+  0xCB1069B6u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_007_ALT02
+  0x92DCC8FEu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_008
+  0x34A4191Eu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_012
+  0x2DA80B7Au, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_013
+  0x449FB915u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_015
+  0x7B6C26ADu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_016
+  0xD8ADD75Bu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_017_ALT02
+  0x42B8391Eu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_019_ALT01
+  0x0226B31Cu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_020
+  0xE0306F30u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_021
+  0x37981DFAu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_025
+  0x5BD1666Cu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_026
+  0x1C8EEA58u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_041
+  0xD95CE3F5u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_045
+  0xF203B67Eu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_047_ALT02
+  0xB1FC1534u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_048
+  0x710E8D72u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_050
+  0x7AD4A0FEu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_051
+  0xCD80C659u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_052
+  0xFE573C2Au, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_053_ALT02
+  0xC4943480u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_055
+  0xFEDBA90Eu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_058
+  0x4725B899u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_060
+  0xB471F06Au, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_063_ALT01
+  0xBD912572u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_068
+  0x279BF986u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_069
+  0x4CB851A6u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_075
+  0x144F60D5u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_079
+  0xA7AEFD66u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_086
+  0x79A8A15Au, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_087
+  0x6D2E8866u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_088
+  0x5F73ECF1u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_089
+  0xFEFDB842u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_093
+  0xC91DE988u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_100
+  0x660AA363u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_102
+  0x0BA1EE93u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_103
+  0xF9844A58u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_104
+  0xA847A7DCu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_105
+  0xE970AA31u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_109
+  0x726A3FA6u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_111
+  0xB2F7C0C0u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_112
+  0x4D6EDC6Cu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_133
+  0x16A1F838u, // CLOTHING_ITEM_SP_EXOTICCOLLECTOR_HAT_000
+  0x54F13AD7u, // CLOTHING_ITEM_SP_FISHCOLLECTOR_HAT_000
+  0xA0977C6Du, // CLOTHING_ITEM_SP_VALSHERIFF_HAT_000
   0xD27A6462u, // CLOTHING_P3_PLAYER_THREE_MS1_HAT_000_000
   0xD44F333Au, // CLOTHING_P3_PLAYER_THREE_MS1_HAT_001_000
-  0x18BEFAB4u, // CLOTHING_ITEM_PZ_HAT_PIRATE_01
+  0xD1F44584u, // CLOTHING_SP_CHINESE_LABOR_HAT_000_1
+  0xA53EAF6Du, // CLOTHING_SP_CIVIL_WAR_HAT_000_1
+  0x17FF42D8u, // CLOTHING_SP_CONQUISTADOR_HAT_000_1
+  0xE83908D5u, // CLOTHING_SP_DEAD_MINER_HAT_000_1
   0xBE66854Au, // CLOTHING_SP_SCARECROW_01_HAT_000_1
   0x5305447Fu, // CLOTHING_SP_SCARECROW_02_HAT_000_1
   0x4B161404u, // CLOTHING_SP_SCARECROW_03_HAT_000_1
   0xE5CBECFFu, // CLOTHING_SP_SCARECROW_04_HAT_000_1
-  0x0226B31Cu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_020
-  0x0BF0BB3Cu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_004
-  0x144F60D5u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_079
-  0x1C8EEA58u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_041
-  0x279BF986u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_069
-  0x2DA80B7Au, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_013
-  0x34A4191Eu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_012
-  0x37981DFAu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_025
-  0x42B8391Eu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_019_ALT01
-  0x449FB915u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_015
-  0x4725B899u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_060
-  0x4CB851A6u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_075
-  0x5BD1666Cu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_026
-  0x5F73ECF1u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_089
-  0x6D2E8866u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_088
-  0x710E8D72u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_050
-  0x73968A7Eu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_000
-  0x79A8A15Au, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_087
-  0x7AD4A0FEu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_051
-  0x7B6C26ADu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_016
-  0x92DCC8FEu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_008
-  0xA7AEFD66u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_086
-  0xB1FC1534u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_048
-  0xB471F06Au, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_063_ALT01
-  0xBD912572u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_068
-  0xC4943480u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_055
-  0xCA2FAA11u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_002_ALT02
-  0xCB1069B6u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_007_ALT02
-  0xCD80C659u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_052
-  0xD6E57DB5u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_006_ALT02
-  0xD8ADD75Bu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_017_ALT02
-  0xD95CE3F5u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_045
-  0xE0306F30u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_021
-  0xF203B67Eu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_047_ALT02
-  0xFAAC18B3u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_005
-  0xFE573C2Au, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_053_ALT02
-  0xFEDBA90Eu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_058
-  0xFEFDB842u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_093
-  0x0BA1EE93u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_103
-  0x4D6EDC6Cu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_133
-  0x660AA363u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_102
-  0x726A3FA6u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_111
-  0xA847A7DCu, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_105
-  0xB2F7C0C0u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_112
-  0xC91DE988u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_100
-  0xE970AA31u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_109
-  0xF9844A58u, // CLOTHING_ITEM_SP_COLLECTABLE_HAT_MR1_104
-  0x16A1F838u, // CLOTHING_ITEM_SP_EXOTICCOLLECTOR_HAT_000
-  0x54F13AD7u, // CLOTHING_ITEM_SP_FISHCOLLECTOR_HAT_000
-  0xA0977C6Du, // CLOTHING_ITEM_SP_VALSHERIFF_HAT_000
   0x9DCEBC09u, // CLOTHING_SP_VIKING_HAT_000_1
 };
 static const char *const OF_HATS_N[] = {
-  "?",
-  "Chinese Labor Hat 000 1",
-  "Civil War Hat 000 1",
-  "Conquistador Hat 000 1",
-  "Dead Miner Hat 000 1",
+  "Hats 000 (C2F59087)",
+  "Clothing Hat 000 Police",
+  "Clothing Hat Grizzled Jon",
   "Hat 000 000 1",
   "Hat 000 001 1",
   "Hat 000 002 1",
@@ -355,7 +353,6 @@ static const char *const OF_HATS_N[] = {
   "Hat 000 009 1",
   "Hat 000 010 1",
   "Hat 000 011 1",
-  "Hat 000 Police",
   "Hat 002 10",
   "Hat 002 2",
   "Hat 002 3",
@@ -612,66 +609,150 @@ static const char *const OF_HATS_N[] = {
   "Hat 071 1",
   "Hat 072 1",
   "Hat 073 1",
-  "Hat Grizzled Jon",
   "Hat Pzero 000",
-  "P3 Player Three Ms1 Hat ",
-  "P3 Player Three Ms1 Hat ",
   "Pz Hat Pirate 01",
+  "Sp Collectable Hat Mr1 000",
+  "Sp Collectable Hat Mr1 002 Alt02",
+  "Sp Collectable Hat Mr1 004",
+  "Sp Collectable Hat Mr1 005",
+  "Sp Collectable Hat Mr1 006 Alt02",
+  "Sp Collectable Hat Mr1 007 Alt02",
+  "Sp Collectable Hat Mr1 008",
+  "Sp Collectable Hat Mr1 012",
+  "Sp Collectable Hat Mr1 013",
+  "Sp Collectable Hat Mr1 015",
+  "Sp Collectable Hat Mr1 016",
+  "Sp Collectable Hat Mr1 017 Alt02",
+  "Sp Collectable Hat Mr1 019 Alt01",
+  "Sp Collectable Hat Mr1 020",
+  "Sp Collectable Hat Mr1 021",
+  "Sp Collectable Hat Mr1 025",
+  "Sp Collectable Hat Mr1 026",
+  "Sp Collectable Hat Mr1 041",
+  "Sp Collectable Hat Mr1 045",
+  "Sp Collectable Hat Mr1 047 Alt02",
+  "Sp Collectable Hat Mr1 048",
+  "Sp Collectable Hat Mr1 050",
+  "Sp Collectable Hat Mr1 051",
+  "Sp Collectable Hat Mr1 052",
+  "Sp Collectable Hat Mr1 053 Alt02",
+  "Sp Collectable Hat Mr1 055",
+  "Sp Collectable Hat Mr1 058",
+  "Sp Collectable Hat Mr1 060",
+  "Sp Collectable Hat Mr1 063 Alt01",
+  "Sp Collectable Hat Mr1 068",
+  "Sp Collectable Hat Mr1 069",
+  "Sp Collectable Hat Mr1 075",
+  "Sp Collectable Hat Mr1 079",
+  "Sp Collectable Hat Mr1 086",
+  "Sp Collectable Hat Mr1 087",
+  "Sp Collectable Hat Mr1 088",
+  "Sp Collectable Hat Mr1 089",
+  "Sp Collectable Hat Mr1 093",
+  "Sp Collectable Hat Mr1 100",
+  "Sp Collectable Hat Mr1 102",
+  "Sp Collectable Hat Mr1 103",
+  "Sp Collectable Hat Mr1 104",
+  "Sp Collectable Hat Mr1 105",
+  "Sp Collectable Hat Mr1 109",
+  "Sp Collectable Hat Mr1 111",
+  "Sp Collectable Hat Mr1 112",
+  "Sp Collectable Hat Mr1 133",
+  "Sp Exoticcollector Hat 000",
+  "Sp Fishcollector Hat 000",
+  "Sp Valsheriff Hat 000",
+  "Clothing P3 Player Three Ms1 Hat 000 000",
+  "Clothing P3 Player Three Ms1 Hat 001 000",
+  "Chinese Labor Hat 000 1",
+  "Civil War Hat 000 1",
+  "Conquistador Hat 000 1",
+  "Dead Miner Hat 000 1",
   "Scarecrow 01 Hat 000 1",
   "Scarecrow 02 Hat 000 1",
   "Scarecrow 03 Hat 000 1",
   "Scarecrow 04 Hat 000 1",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 0",
-  "Sp Collectable Hat Mr1 1",
-  "Sp Collectable Hat Mr1 1",
-  "Sp Collectable Hat Mr1 1",
-  "Sp Collectable Hat Mr1 1",
-  "Sp Collectable Hat Mr1 1",
-  "Sp Collectable Hat Mr1 1",
-  "Sp Collectable Hat Mr1 1",
-  "Sp Collectable Hat Mr1 1",
-  "Sp Collectable Hat Mr1 1",
-  "Sp Exoticcollector Hat 0",
-  "Sp Fishcollector Hat 000",
-  "Sp Valsheriff Hat 000",
   "Viking Hat 000 1",
+};
+
+static const uint32_t OF_HAIR[] = {
+  0x10A31955u, // unnamed
+  0x10DC5877u, // unnamed
+  0x1F992CE6u, // unnamed
+  0x23E6F04Au, // unnamed
+  0x33698F4Bu, // unnamed
+  0x37A566F6u, // unnamed
+  0x39665BB3u, // unnamed
+  0x3C534B23u, // unnamed
+  0x44EAB19Eu, // unnamed
+  0x457AD09Du, // unnamed
+  0x4C43EAB8u, // unnamed
+  0x4F8F7636u, // unnamed
+  0x52499FACu, // unnamed
+  0x57B7420Fu, // unnamed
+  0x60169744u, // unnamed
+  0x819EDFACu, // unnamed
+  0x834F7AE9u, // unnamed
+  0x87BB07E7u, // unnamed
+  0x8EB6A076u, // unnamed
+  0xA5EF55ABu, // unnamed
+  0xA846C709u, // unnamed
+  0xACFEB669u, // unnamed
+  0xB920F6EFu, // unnamed
+  0xBB97200Fu, // unnamed
+  0xBC0220E9u, // unnamed
+  0xC150DF0Bu, // unnamed
+  0xC5392F63u, // unnamed
+  0xC89BC076u, // unnamed
+  0xCEB1AE42u, // unnamed
+  0xCF748206u, // unnamed
+  0xD41F46FBu, // unnamed
+  0xD7C79FBFu, // unnamed
+  0xE23A582Fu, // unnamed
+  0xED6494D5u, // unnamed
+  0xF160F64Cu, // unnamed
+  0xF4712E87u, // unnamed
+  0x264A371Eu, // CLOTHING_ITEM_HAIR_BALD
+  0xA83C1A4Au, // CLOTHING_ITEM_HAIR_SWEPT_BACK
+};
+static const char *const OF_HAIR_N[] = {
+  "Hair 000 (10A31955)",
+  "Hair 001 (10DC5877)",
+  "Hair 002 (1F992CE6)",
+  "Hair 003 (23E6F04A)",
+  "Hair 004 (33698F4B)",
+  "Hair 005 (37A566F6)",
+  "Hair 006 (39665BB3)",
+  "Hair 007 (3C534B23)",
+  "Hair 008 (44EAB19E)",
+  "Hair 009 (457AD09D)",
+  "Hair 010 (4C43EAB8)",
+  "Hair 011 (4F8F7636)",
+  "Hair 012 (52499FAC)",
+  "Hair 013 (57B7420F)",
+  "Hair 014 (60169744)",
+  "Hair 015 (819EDFAC)",
+  "Hair 016 (834F7AE9)",
+  "Hair 017 (87BB07E7)",
+  "Hair 018 (8EB6A076)",
+  "Hair 019 (A5EF55AB)",
+  "Hair 020 (A846C709)",
+  "Hair 021 (ACFEB669)",
+  "Hair 022 (B920F6EF)",
+  "Hair 023 (BB97200F)",
+  "Hair 024 (BC0220E9)",
+  "Hair 025 (C150DF0B)",
+  "Hair 026 (C5392F63)",
+  "Hair 027 (C89BC076)",
+  "Hair 028 (CEB1AE42)",
+  "Hair 029 (CF748206)",
+  "Hair 030 (D41F46FB)",
+  "Hair 031 (D7C79FBF)",
+  "Hair 032 (E23A582F)",
+  "Hair 033 (ED6494D5)",
+  "Hair 034 (F160F64C)",
+  "Hair 035 (F4712E87)",
+  "Hair Bald",
+  "Hair Swept Back",
 };
 
 static const uint32_t OF_COATS[] = {
@@ -772,8 +853,8 @@ static const uint32_t OF_COATS[] = {
   0x39AB3C5Cu, // CLOTHING_SP_COAT_WINTER01_VARIATION_01
 };
 static const char *const OF_COATS_N[] = {
-  "?",
-  "?",
+  "Coats 000 (13BD3752)",
+  "Coats 001 (E9F757DF)",
   "Coat 001 1",
   "Coat 001 10",
   "Coat 001 11",
@@ -862,11 +943,11 @@ static const char *const OF_COATS_N[] = {
   "Coat 035 1",
   "Coat 036 1",
   "Coat 037 1",
-  "Coat Duster01 Variation ",
-  "Coat Fancy01 Variation 0",
-  "Coat Heist01 Variation 0",
-  "Coat Rancher01 Variation",
-  "Coat Winter01 Variation ",
+  "Coat Duster01 Variation 01",
+  "Coat Fancy01 Variation 01",
+  "Coat Heist01 Variation 01",
+  "Coat Rancher01 Variation 01",
+  "Coat Winter01 Variation 01",
 };
 
 static const uint32_t OF_SHIRTS_FULL[] = {
@@ -877,7 +958,6 @@ static const uint32_t OF_SHIRTS_FULL[] = {
   0x524CEF30u, // unnamed
   0x5536513Bu, // unnamed
   0x6768F5A0u, // unnamed
-  0x7591C78Cu, // CLOTHING_SP_COAT_POLICE01_VARIATION_01
   0x9CDC866Au, // CLOTHING_HL_PLAYER_SHIRT_000_1
   0x97F60895u, // CLOTHING_HL_PLAYER_SHIRT_000_13
   0xC68365AFu, // CLOTHING_HL_PLAYER_SHIRT_000_14
@@ -935,9 +1015,6 @@ static const uint32_t OF_SHIRTS_FULL[] = {
   0xF0364AE1u, // CLOTHING_HL_PLAYER_SHIRT_010_7
   0xA570B557u, // CLOTHING_HL_PLAYER_SHIRT_010_8
   0xCCA883C6u, // CLOTHING_HL_PLAYER_SHIRT_010_9
-  0x87AA97FBu, // CLOTHING_SP_SHIRT_BOUNTY01_VARIATION_01
-  0x91B2F27Bu, // CLOTHING_SP_SHIRT_FANCY01_VARIATION_01
-  0x27771AE0u, // CLOTHING_SP_SHIRT_ISLAND01_VARIATION_01
   0xDF32E793u, // CLOTHING_HL_PLAYER_UST_000_1
   0x617BB8FDu, // CLOTHING_HL_PLAYER_UST_000_17
   0xE1493896u, // CLOTHING_HL_PLAYER_UST_000_18
@@ -953,16 +1030,19 @@ static const uint32_t OF_SHIRTS_FULL[] = {
   0x47103744u, // CLOTHING_HL_PLAYER_UST_000_6
   0x57DF58E2u, // CLOTHING_HL_PLAYER_UST_000_7
   0x44333196u, // CLOTHING_HL_PLAYER_UST_000_8
+  0x7591C78Cu, // CLOTHING_SP_COAT_POLICE01_VARIATION_01
+  0x87AA97FBu, // CLOTHING_SP_SHIRT_BOUNTY01_VARIATION_01
+  0x91B2F27Bu, // CLOTHING_SP_SHIRT_FANCY01_VARIATION_01
+  0x27771AE0u, // CLOTHING_SP_SHIRT_ISLAND01_VARIATION_01
 };
 static const char *const OF_SHIRTS_FULL_N[] = {
-  "?",
-  "?",
-  "?",
-  "?",
-  "?",
-  "?",
-  "?",
-  "Coat Police01 Variation ",
+  "Shirts 000 (146F37E2)",
+  "Shirts 001 (3B171A26)",
+  "Shirts 002 (4C31BC5B)",
+  "Shirts 003 (50D5054B)",
+  "Shirts 004 (524CEF30)",
+  "Shirts 005 (5536513B)",
+  "Shirts 006 (6768F5A0)",
   "Shirt 000 1",
   "Shirt 000 13",
   "Shirt 000 14",
@@ -1020,9 +1100,6 @@ static const char *const OF_SHIRTS_FULL_N[] = {
   "Shirt 010 7",
   "Shirt 010 8",
   "Shirt 010 9",
-  "Shirt Bounty01 Variation",
-  "Shirt Fancy01 Variation ",
-  "Shirt Island01 Variation",
   "Ust 000 1",
   "Ust 000 17",
   "Ust 000 18",
@@ -1038,6 +1115,10 @@ static const char *const OF_SHIRTS_FULL_N[] = {
   "Ust 000 6",
   "Ust 000 7",
   "Ust 000 8",
+  "Coat Police01 Variation 01",
+  "Shirt Bounty01 Variation 01",
+  "Shirt Fancy01 Variation 01",
+  "Shirt Island01 Variation 01",
 };
 
 static const uint32_t OF_VESTS[] = {
@@ -1045,7 +1126,22 @@ static const uint32_t OF_VESTS[] = {
   0x8E7B25F4u, // unnamed
   0xE38B7A07u, // unnamed
   0xE3F12FF2u, // unnamed
-  0x9F7E2464u, // CLOTHING_SP_PRE_PLAYER_VEST_005_1
+  0xAB9C65F4u, // CLOTHING_HL_PLAYER_VESTS_006_11
+  0xAD09683Au, // CLOTHING_HL_PLAYER_VESTS_012_1
+  0xC473970Eu, // CLOTHING_HL_PLAYER_VESTS_012_2
+  0x395C353Fu, // CLOTHING_HL_PLAYER_VESTS_013_1
+  0xDCF16BF7u, // CLOTHING_HL_PLAYER_VESTS_014_1
+  0x036F1224u, // CLOTHING_HL_PLAYER_VESTS_016_1
+  0xAA95CF24u, // CLOTHING_HL_PLAYER_VESTS_017_1
+  0x1CAC7B98u, // CLOTHING_HL_PLAYER_VESTS_018_1
+  0xC014C1C2u, // CLOTHING_HL_PLAYER_VESTS_019_1
+  0xF5A60D53u, // CLOTHING_HL_PLAYER_VESTS_020_1
+  0x4D229596u, // CLOTHING_HL_PLAYER_VESTS_021_1
+  0x04E8FADBu, // CLOTHING_HL_PLAYER_VESTS_022_1
+  0x64DCF194u, // CLOTHING_HL_PLAYER_VESTS_023_1
+  0xE46B39EDu, // CLOTHING_HL_PLAYER_VESTS_025_1
+  0x1C50DE66u, // CLOTHING_HL_PLAYER_VESTS_026_1
+  0xBA0D6076u, // CLOTHING_HL_PLAYER_VESTS_027_1
   0x9B6744B9u, // CLOTHING_HL_PLAYER_VEST_000_1
   0x030CD547u, // CLOTHING_HL_PLAYER_VEST_000_10
   0x116571F8u, // CLOTHING_HL_PLAYER_VEST_000_11
@@ -1113,30 +1209,30 @@ static const uint32_t OF_VESTS[] = {
   0xFBA04F60u, // CLOTHING_HL_PLAYER_VEST_011_7
   0x0C047028u, // CLOTHING_HL_PLAYER_VEST_011_8
   0x9EEA15EDu, // CLOTHING_HL_PLAYER_VEST_011_9
+  0x9F7E2464u, // CLOTHING_SP_PRE_PLAYER_VEST_005_1
   0x176EC610u, // CLOTHING_SP_VEST_FANCY01_VARIATION_01
-  0xAB9C65F4u, // CLOTHING_HL_PLAYER_VESTS_006_11
-  0xAD09683Au, // CLOTHING_HL_PLAYER_VESTS_012_1
-  0xC473970Eu, // CLOTHING_HL_PLAYER_VESTS_012_2
-  0x395C353Fu, // CLOTHING_HL_PLAYER_VESTS_013_1
-  0xDCF16BF7u, // CLOTHING_HL_PLAYER_VESTS_014_1
-  0x036F1224u, // CLOTHING_HL_PLAYER_VESTS_016_1
-  0xAA95CF24u, // CLOTHING_HL_PLAYER_VESTS_017_1
-  0x1CAC7B98u, // CLOTHING_HL_PLAYER_VESTS_018_1
-  0xC014C1C2u, // CLOTHING_HL_PLAYER_VESTS_019_1
-  0xF5A60D53u, // CLOTHING_HL_PLAYER_VESTS_020_1
-  0x4D229596u, // CLOTHING_HL_PLAYER_VESTS_021_1
-  0x04E8FADBu, // CLOTHING_HL_PLAYER_VESTS_022_1
-  0x64DCF194u, // CLOTHING_HL_PLAYER_VESTS_023_1
-  0xE46B39EDu, // CLOTHING_HL_PLAYER_VESTS_025_1
-  0x1C50DE66u, // CLOTHING_HL_PLAYER_VESTS_026_1
-  0xBA0D6076u, // CLOTHING_HL_PLAYER_VESTS_027_1
 };
 static const char *const OF_VESTS_N[] = {
-  "?",
-  "?",
-  "?",
-  "?",
-  "Pre Player Vest 005 1",
+  "Vests 000 (0B161B73)",
+  "Vests 001 (8E7B25F4)",
+  "Vests 002 (E38B7A07)",
+  "Vests 003 (E3F12FF2)",
+  "Vests 006 11",
+  "Vests 012 1",
+  "Vests 012 2",
+  "Vests 013 1",
+  "Vests 014 1",
+  "Vests 016 1",
+  "Vests 017 1",
+  "Vests 018 1",
+  "Vests 019 1",
+  "Vests 020 1",
+  "Vests 021 1",
+  "Vests 022 1",
+  "Vests 023 1",
+  "Vests 025 1",
+  "Vests 026 1",
+  "Vests 027 1",
   "Vest 000 1",
   "Vest 000 10",
   "Vest 000 11",
@@ -1204,23 +1300,8 @@ static const char *const OF_VESTS_N[] = {
   "Vest 011 7",
   "Vest 011 8",
   "Vest 011 9",
-  "Vest Fancy01 Variation 0",
-  "Vests 006 11",
-  "Vests 012 1",
-  "Vests 012 2",
-  "Vests 013 1",
-  "Vests 014 1",
-  "Vests 016 1",
-  "Vests 017 1",
-  "Vests 018 1",
-  "Vests 019 1",
-  "Vests 020 1",
-  "Vests 021 1",
-  "Vests 022 1",
-  "Vests 023 1",
-  "Vests 025 1",
-  "Vests 026 1",
-  "Vests 027 1",
+  "Pre Player Vest 005 1",
+  "Vest Fancy01 Variation 01",
 };
 
 static const uint32_t OF_PANTS[] = {
@@ -1378,16 +1459,16 @@ static const uint32_t OF_PANTS[] = {
   0x02DD30BCu, // CLOTHING_SP_PANTS_RANCHER01_VARIATION_01
 };
 static const char *const OF_PANTS_N[] = {
-  "?",
-  "?",
-  "?",
-  "?",
-  "?",
-  "?",
-  "?",
-  "?",
-  "?",
-  "?",
+  "Pants 000 (0D1129BC)",
+  "Pants 001 (0E5E7EBC)",
+  "Pants 002 (193FA872)",
+  "Pants 003 (2348562A)",
+  "Pants 004 (2F659E51)",
+  "Pants 005 (A27AD48D)",
+  "Pants 006 (A5532C9F)",
+  "Pants 007 (B7B4FF01)",
+  "Pants 008 (D2E52DA6)",
+  "Pants 009 (F9F8A51D)",
   "Pants 000 1",
   "Pants 000 10",
   "Pants 000 11",
@@ -1526,14 +1607,15 @@ static const char *const OF_PANTS_N[] = {
   "Pants 013 7",
   "Pants 013 8",
   "Pants 013 9",
-  "Pants Fancy01 Variation ",
-  "Pants Island01 Variation",
-  "Pants Police01 Variation",
-  "Pants Rancher01 Variatio",
+  "Pants Fancy01 Variation 01",
+  "Pants Island01 Variation 01",
+  "Pants Police01 Variation 01",
+  "Pants Rancher01 Variation 01",
 };
 
 static const uint32_t OF_BOOTS[] = {
   0x38B4CA64u, // unnamed
+  0xE90F4791u, // CLOTHING_BOOTS_000_POLICE
   0xDF063937u, // CLOTHING_HL_PLAYER_BOOT_000_10
   0xC9B70445u, // CLOTHING_HL_PLAYER_BOOT_000_2
   0xE7623F9Bu, // CLOTHING_HL_PLAYER_BOOT_000_3
@@ -1691,13 +1773,13 @@ static const uint32_t OF_BOOTS[] = {
   0x1A667B0Au, // CLOTHING_HL_PLAYER_BOOT_048_1
   0x741C2CF4u, // CLOTHING_HL_PLAYER_BOOT_050_1
   0x38277461u, // CLOTHING_HL_PLAYER_BOOT_052_1
-  0xE90F4791u, // CLOTHING_BOOTS_000_POLICE
   0xE953A7C5u, // CLOTHING_ITEM_BOOTS_PZERO_000
   0xD716034Au, // CLOTHING_ITEM_BOOTS_PZERO_001
   0x8112D739u, // CLOTHING_ITEM_BOOTS_PZERO_002
 };
 static const char *const OF_BOOTS_N[] = {
-  "?",
+  "Boots 000 (38B4CA64)",
+  "Clothing Boots 000 Police",
   "Boot 000 10",
   "Boot 000 2",
   "Boot 000 3",
@@ -1855,7 +1937,6 @@ static const char *const OF_BOOTS_N[] = {
   "Boot 048 1",
   "Boot 050 1",
   "Boot 052 1",
-  "Boots 000 Police",
   "Boots Pzero 000",
   "Boots Pzero 001",
   "Boots Pzero 002",
@@ -1965,7 +2046,7 @@ static const char *const OF_GLOVES_N[] = {
   "Gloves 022 1",
   "Gloves 023 1",
   "Gloves Pzero 000",
-  "P3 Player Three Ms1 Glov",
+  "Clothing P3 Player Three Ms1 Gloves 000 000",
 };
 
 static const uint32_t OF_NECKTIES[] = {
@@ -1996,8 +2077,8 @@ static const uint32_t OF_NECKTIES[] = {
   0x8DD16589u, // CLOTHING_ITEM_NECKTIES_PZERO_001
 };
 static const char *const OF_NECKTIES_N[] = {
-  "?",
-  "?",
+  "Neckties 000 (DF4A0DD2)",
+  "Neckties 001 (F8716430)",
   "Necktie 002 1",
   "Necktie 002 10",
   "Necktie 002 2",
@@ -2026,16 +2107,16 @@ static const char *const OF_NECKTIES_N[] = {
 static const uint32_t OF_NECKWEAR[] = {
   0x7C76451Bu, // unnamed
   0xE508E276u, // unnamed
+  0x32544B14u, // CLOTHING_ITEM_PZ_NECKERCHIEF_001
   0x9F37DDC6u, // KIT_BANDANA
   0xF4FBCF50u, // PROVISION_TALISMAN_BOAR_TUSK
-  0x32544B14u, // CLOTHING_ITEM_PZ_NECKERCHIEF_001
 };
 static const char *const OF_NECKWEAR_N[] = {
-  "?",
-  "?",
-  "Kit Bandana",
-  "Provision Talisman Boar ",
+  "Neckwear 000 (7C76451B)",
+  "Neckwear 001 (E508E276)",
   "Pz Neckerchief 001",
+  "Kit Bandana",
+  "Provision Talisman Boar Tusk",
 };
 
 static const uint32_t OF_SUSPENDERS[] = {
@@ -2087,8 +2168,8 @@ static const uint32_t OF_SUSPENDERS[] = {
   0xBAF93206u, // CLOTHING_SP_SUSPENDERS_ISLAND01_VARIATION_01
 };
 static const char *const OF_SUSPENDERS_N[] = {
-  "?",
-  "?",
+  "Suspenders 000 (6D087754)",
+  "Suspenders 001 (A7CDECDE)",
   "Suspenders 000 1",
   "Suspenders 000 10",
   "Suspenders 000 2",
@@ -2131,8 +2212,8 @@ static const char *const OF_SUSPENDERS_N[] = {
   "Suspenders 007 7",
   "Suspenders 007 8",
   "Suspenders 007 9",
-  "Suspenders Hunter01 Vari",
-  "Suspenders Island01 Vari",
+  "Suspenders Hunter01 Variation 01",
+  "Suspenders Island01 Variation 01",
 };
 
 static const uint32_t OF_SPATS[] = {
@@ -2168,7 +2249,7 @@ static const uint32_t OF_SPATS[] = {
   0x42D097FCu, // CLOTHING_HL_PLAYER_SPATS_014_1
 };
 static const char *const OF_SPATS_N[] = {
-  "?",
+  "Spats 000 (953D528E)",
   "Spats 000 1",
   "Spats 000 10",
   "Spats 000 11",
@@ -2270,9 +2351,9 @@ static const uint32_t OF_ACCESSORIES[] = {
   0x1C92E7D8u, // CLOTHING_ITEM_SATCHEL_PZ_000_MONEY_BAG
 };
 static const char *const OF_ACCESSORIES_N[] = {
-  "?",
-  "?",
-  "?",
+  "Accessories 000 (281A5C46)",
+  "Accessories 001 (51FBD089)",
+  "Accessories 002 (7DCD208F)",
   "Satchel Pz 000 Money Bag",
 };
 
@@ -2282,49 +2363,49 @@ static const uint32_t OF_BELTS[] = {
   0x6E03DF12u, // unnamed
 };
 static const char *const OF_BELTS_N[] = {
-  "?",
-  "?",
-  "?",
+  "Belts 000 (57CE45CA)",
+  "Belts 001 (58226307)",
+  "Belts 002 (6E03DF12)",
 };
 
 static const uint32_t OF_GUNBELTS[] = {
   0x408C9C8Eu, // unnamed
   0x48FF3E48u, // unnamed
   0xDE42DD9Eu, // unnamed
+  0x8675FB36u, // CLOTHING_ITEM_GUNBELT_PZERO_000
   0xE5404163u, // CLOTHING_SP_GUNBELT_001
   0xE3093CF5u, // CLOTHING_SP_GUNBELT_002
   0x2E43D36Du, // CLOTHING_SP_GUNBELT_005
   0xB7BD69B6u, // CLOTHING_SP_GUNBELT_013
-  0x8675FB36u, // CLOTHING_ITEM_GUNBELT_PZERO_000
-  0x13AE3B04u, // PROVISION_REINFORCED_GUNBELT_PANTHER
-  0x14ED6C7Eu, // PROVISION_REINFORCED_GUNBELT_BOAR
   0x4CDE0BEAu, // PROVISION_REINFORCED_GUNBELT_BEAR
-  0x7FEA9DBAu, // PROVISION_REINFORCED_GUNBELT_DEER
-  0xB7F16340u, // PROVISION_REINFORCED_GUNBELT_RABBIT
+  0x14ED6C7Eu, // PROVISION_REINFORCED_GUNBELT_BOAR
   0xC4EA99AAu, // PROVISION_REINFORCED_GUNBELT_BUFFALO
   0xE56257BCu, // PROVISION_REINFORCED_GUNBELT_COUGAR
+  0x7FEA9DBAu, // PROVISION_REINFORCED_GUNBELT_DEER
   0xFB5FF58Fu, // PROVISION_REINFORCED_GUNBELT_GATOR
+  0x13AE3B04u, // PROVISION_REINFORCED_GUNBELT_PANTHER
+  0xB7F16340u, // PROVISION_REINFORCED_GUNBELT_RABBIT
   0xFF3B18DDu, // PROVISION_REINFORCED_GUNBELT_SNAKE
   0xE40099F8u, // UPGRADE_GUN_BELT
 };
 static const char *const OF_GUNBELTS_N[] = {
-  "?",
-  "?",
-  "?",
+  "Gunbelts 000 (408C9C8E)",
+  "Gunbelts 001 (48FF3E48)",
+  "Gunbelts 002 (DE42DD9E)",
+  "Gunbelt Pzero 000",
   "Gunbelt 001",
   "Gunbelt 002",
   "Gunbelt 005",
   "Gunbelt 013",
-  "Gunbelt Pzero 000",
-  "Provision Reinforced Gun",
-  "Provision Reinforced Gun",
-  "Provision Reinforced Gun",
-  "Provision Reinforced Gun",
-  "Provision Reinforced Gun",
-  "Provision Reinforced Gun",
-  "Provision Reinforced Gun",
-  "Provision Reinforced Gun",
-  "Provision Reinforced Gun",
+  "Provision Reinforced Gunbelt Bear",
+  "Provision Reinforced Gunbelt Boar",
+  "Provision Reinforced Gunbelt Buffalo",
+  "Provision Reinforced Gunbelt Cougar",
+  "Provision Reinforced Gunbelt Deer",
+  "Provision Reinforced Gunbelt Gator",
+  "Provision Reinforced Gunbelt Panther",
+  "Provision Reinforced Gunbelt Rabbit",
+  "Provision Reinforced Gunbelt Snake",
   "Upgrade Gun Belt",
 };
 
@@ -2333,7 +2414,7 @@ static const uint32_t OF_BADGES[] = {
   0x0A8CAFE6u, // CLOTHING_ITEM_BADGE_PZERO_000
 };
 static const char *const OF_BADGES_N[] = {
-  "?",
+  "Badges 000 (DB4C451D)",
   "Badge Pzero 000",
 };
 
@@ -2359,7 +2440,7 @@ static const uint32_t OF_SATCHELS[] = {
   0x3EC38679u, // CLOTHING_ITEM_SATCHEL_PZ_000
 };
 static const char *const OF_SATCHELS_N[] = {
-  "?",
+  "Satchels 000 (7AF05834)",
   "Satchel 002 1",
   "Satchel 003 1",
   "Satchel 004 1",
@@ -2374,7 +2455,6 @@ static const char *const OF_SATCHELS_N[] = {
 static const uint32_t OF_BOOT_ACCESSORIES[] = {
   0xC589C410u, // unnamed
   0xCE51F28Cu, // unnamed
-  0xDB548518u, // PROVISION_TALISMAN_EAGLE_TALON
   0xBB68960Fu, // CLOTHING_HL_PLAYER_SPURS_000_10
   0xD6B2CCA3u, // CLOTHING_HL_PLAYER_SPURS_000_11
   0xE8106F5Eu, // CLOTHING_HL_PLAYER_SPURS_000_12
@@ -2461,11 +2541,11 @@ static const uint32_t OF_BOOT_ACCESSORIES[] = {
   0x2413985Eu, // CLOTHING_HL_PLAYER_SPURS_022_9
   0xCCD8FE3Fu, // CLOTHING_HL_PLAYER_SPURS_023_1
   0x13629C06u, // CLOTHING_HL_PLAYER_SPURS_024_1
+  0xDB548518u, // PROVISION_TALISMAN_EAGLE_TALON
 };
 static const char *const OF_BOOT_ACCESSORIES_N[] = {
-  "?",
-  "?",
-  "Provision Talisman Eagle",
+  "Spurs 000 (C589C410)",
+  "Spurs 001 (CE51F28C)",
   "Spurs 000 10",
   "Spurs 000 11",
   "Spurs 000 12",
@@ -2552,36 +2632,37 @@ static const char *const OF_BOOT_ACCESSORIES_N[] = {
   "Spurs 022 9",
   "Spurs 023 1",
   "Spurs 024 1",
+  "Provision Talisman Eagle Talon",
 };
 
 static const uint32_t OF_HOLSTERS_LEFT[] = {
   0xA5A5989Au, // unnamed
   0x359EFAD0u, // CLOTHING_SP_OFFHAND_000
   0xEDFD6B8Eu, // CLOTHING_SP_OFFHAND_004
-  0x1EC3956Eu, // PROVISION_REINFORCED_OFFHAND_DEER
+  0xDE333016u, // PROVISION_REINFORCED_OFFHAND_BEAR
   0x2F85F580u, // PROVISION_REINFORCED_OFFHAND_BOAR
-  0x3F8B767Cu, // PROVISION_REINFORCED_OFFHAND_GATOR
-  0x79069109u, // PROVISION_REINFORCED_OFFHAND_RABBIT
-  0x7C3D43CAu, // PROVISION_REINFORCED_OFFHAND_SNAKE
   0x9C7D5A0Fu, // PROVISION_REINFORCED_OFFHAND_BUFFALO
   0xC3B3D66Bu, // PROVISION_REINFORCED_OFFHAND_COUGAR
+  0x1EC3956Eu, // PROVISION_REINFORCED_OFFHAND_DEER
+  0x3F8B767Cu, // PROVISION_REINFORCED_OFFHAND_GATOR
   0xC7F0E174u, // PROVISION_REINFORCED_OFFHAND_PANTHER
-  0xDE333016u, // PROVISION_REINFORCED_OFFHAND_BEAR
+  0x79069109u, // PROVISION_REINFORCED_OFFHAND_RABBIT
+  0x7C3D43CAu, // PROVISION_REINFORCED_OFFHAND_SNAKE
   0xB95C1E20u, // UPGRADE_OFFHAND_HOLSTER
 };
 static const char *const OF_HOLSTERS_LEFT_N[] = {
-  "?",
+  "Holster L 000 (A5A5989A)",
   "Offhand 000",
   "Offhand 004",
-  "Provision Reinforced Off",
-  "Provision Reinforced Off",
-  "Provision Reinforced Off",
-  "Provision Reinforced Off",
-  "Provision Reinforced Off",
-  "Provision Reinforced Off",
-  "Provision Reinforced Off",
-  "Provision Reinforced Off",
-  "Provision Reinforced Off",
+  "Provision Reinforced Offhand Bear",
+  "Provision Reinforced Offhand Boar",
+  "Provision Reinforced Offhand Buffalo",
+  "Provision Reinforced Offhand Cougar",
+  "Provision Reinforced Offhand Deer",
+  "Provision Reinforced Offhand Gator",
+  "Provision Reinforced Offhand Panther",
+  "Provision Reinforced Offhand Rabbit",
+  "Provision Reinforced Offhand Snake",
   "Upgrade Offhand Holster",
 };
 
@@ -2593,40 +2674,68 @@ static const uint32_t OF_HOLSTERS_RIGHT[] = {
   0xDE5D4F11u, // unnamed
   0xE8B0946Du, // unnamed
   0xFFBC3D1Cu, // unnamed
-  0x147DE3DAu, // PROVISION_REINFORCED_HOLSTER_COUGAR
-  0x25376605u, // PROVISION_REINFORCED_HOLSTER_GATOR
-  0x26D2671Bu, // PROVISION_REINFORCED_HOLSTER_BUFFALO
   0x5358D14Au, // PROVISION_REINFORCED_HOLSTER_BEAR
+  0xFDDEB0C0u, // PROVISION_REINFORCED_HOLSTER_BOAR
+  0x26D2671Bu, // PROVISION_REINFORCED_HOLSTER_BUFFALO
+  0x147DE3DAu, // PROVISION_REINFORCED_HOLSTER_COUGAR
   0x7B8DA3D9u, // PROVISION_REINFORCED_HOLSTER_DEER
+  0x25376605u, // PROVISION_REINFORCED_HOLSTER_GATOR
   0x8197ED62u, // PROVISION_REINFORCED_HOLSTER_PANTHER
   0x97BF4614u, // PROVISION_REINFORCED_HOLSTER_RABBIT
   0xDD3438B1u, // PROVISION_REINFORCED_HOLSTER_SNAKE
-  0xFDDEB0C0u, // PROVISION_REINFORCED_HOLSTER_BOAR
   0x8A444D5Au, // UPGRADE_HOLSTER
 };
 static const char *const OF_HOLSTERS_RIGHT_N[] = {
-  "?",
-  "?",
-  "?",
-  "?",
-  "?",
-  "?",
-  "?",
-  "Provision Reinforced Hol",
-  "Provision Reinforced Hol",
-  "Provision Reinforced Hol",
-  "Provision Reinforced Hol",
-  "Provision Reinforced Hol",
-  "Provision Reinforced Hol",
-  "Provision Reinforced Hol",
-  "Provision Reinforced Hol",
-  "Provision Reinforced Hol",
+  "Holster R 000 (893C30D0)",
+  "Holster R 001 (9B3E539B)",
+  "Holster R 002 (A9CBE70B)",
+  "Holster R 003 (B3911F0D)",
+  "Holster R 004 (DE5D4F11)",
+  "Holster R 005 (E8B0946D)",
+  "Holster R 006 (FFBC3D1C)",
+  "Provision Reinforced Holster Bear",
+  "Provision Reinforced Holster Boar",
+  "Provision Reinforced Holster Buffalo",
+  "Provision Reinforced Holster Cougar",
+  "Provision Reinforced Holster Deer",
+  "Provision Reinforced Holster Gator",
+  "Provision Reinforced Holster Panther",
+  "Provision Reinforced Holster Rabbit",
+  "Provision Reinforced Holster Snake",
   "Upgrade Holster",
+};
+
+static const uint32_t OF_MASKS_LARGE[] = {
+  0xDC928FFCu, // unnamed
+  0xE33F3DA1u, // unnamed
+  0x3ECF4B14u, // CLOTHING_ITEM_MASK_PIG_001
+  0x1C52051Du, // CLOTHING_ITEM_SKULLMASK_MR1_000_1
+  0xA9257E62u, // CLOTHING_ITEM_SKULLMASK_MR1_001_1
+  0x656A8ED4u, // CLOTHING_ITEM_SKULLMASK_MR1_002_1
+  0x29F2D782u, // KIT_MASK_BLACK_HOOD
+  0xE563CBF2u, // KIT_MASK_BROWN_SACK
+  0x446654CBu, // KIT_MASK_GREY_CLOTH
+  0xF0AC3045u, // KIT_MASK_METAL
+  0xC12284ECu, // KIT_MASK_PSYCHO
+};
+static const char *const OF_MASKS_LARGE_N[] = {
+  "Masks 000 (DC928FFC)",
+  "Masks 001 (E33F3DA1)",
+  "Mask Pig 001",
+  "Skullmask Mr1 000 1",
+  "Skullmask Mr1 001 1",
+  "Skullmask Mr1 002 1",
+  "Kit Mask Black Hood",
+  "Kit Mask Brown Sack",
+  "Kit Mask Grey Cloth",
+  "Kit Mask Metal",
+  "Kit Mask Psycho",
 };
 
 typedef struct { const char *label; const uint32_t *hash; const char *const *names; int n; uint32_t category; } OutfitCategory;
 static const OutfitCategory OUTFIT_CATS[] = {
   { "Hats", OF_HATS, OF_HATS_N, 334, 0x9925C067 },
+  { "Hair", OF_HAIR, OF_HAIR_N, 38, 0x864B03AE },
   { "Coats", OF_COATS, OF_COATS_N, 95, 0xE06D30CE },
   { "Shirts", OF_SHIRTS_FULL, OF_SHIRTS_FULL_N, 83, 0x2026C46D },
   { "Vests", OF_VESTS, OF_VESTS_N, 89, 0x485EE834 },
@@ -2647,15 +2756,16 @@ static const OutfitCategory OUTFIT_CATS[] = {
   { "Spurs", OF_BOOT_ACCESSORIES, OF_BOOT_ACCESSORIES_N, 89, 0x18729F39 },
   { "Holster L", OF_HOLSTERS_LEFT, OF_HOLSTERS_LEFT_N, 13, 0xB6B6122D },
   { "Holster R", OF_HOLSTERS_RIGHT, OF_HOLSTERS_RIGHT_N, 17, 0xB9E2FA01 },
+  { "Masks", OF_MASKS_LARGE, OF_MASKS_LARGE_N, 11, 0x4A73515C },
 };
 #define NOUTFIT_CATS (sizeof(OUTFIT_CATS) / sizeof(OUTFIT_CATS[0]))
 
 static const uint32_t OF_BEARDS_CHIN[] = { 0x4F585B0Fu, 0x621738F5u, 0x0CA2326Cu, 0x78CDED83u };
-static const char *const OF_BEARDS_CHIN_N[] = { "?", "?", "Beard Forked", "Beard Single" };
+static const char *const OF_BEARDS_CHIN_N[] = { "Beard Chin 000 (4F585B0F)", "Beard Chin 001 (621738F5)", "Beard Forked", "Beard Single" };
 static const uint32_t OF_BEARDS_CHOPS[] = { 0x4FB035E3u, 0x9CD93ADAu, 0xBDAC3340u, 0xF5D31879u };
-static const char *const OF_BEARDS_CHOPS_N[] = { "?", "?", "Chops Dunbeary", "Chops Normal" };
+static const char *const OF_BEARDS_CHOPS_N[] = { "Beard Chops 000 (4FB035E3)", "Beard Chops 001 (9CD93ADA)", "Chops Dunbeary", "Chops Normal" };
 static const uint32_t OF_BEARDS_MUSTACHE[] = { 0x0CE2B7AEu, 0xAFA9EC70u, 0xEAD62A92u, 0xA0E6A078u, 0x611B0DCFu, 0x876C5E60u };
-static const char *const OF_BEARDS_MUSTACHE_N[] = { "?", "?", "?", "Stache 002", "Stache Handlebar", "Stache Normal" };
+static const char *const OF_BEARDS_MUSTACHE_N[] = { "Mustache 000 (0CE2B7AE)", "Mustache 001 (AFA9EC70)", "Mustache 002 (EAD62A92)", "Stache 002", "Stache Handlebar", "Stache Normal" };
 static const OutfitCategory OUTFIT_BEARDS[] = {
   { "Beard Chin", OF_BEARDS_CHIN, OF_BEARDS_CHIN_N, 4, 0x15D3C7F2 },
   { "Beard Chops", OF_BEARDS_CHOPS, OF_BEARDS_CHOPS_N, 4, 0xB6B63737 },

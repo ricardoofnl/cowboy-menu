@@ -5,6 +5,7 @@
 #include "ui.h"
 #include "features.h"
 #include "config.h"
+#include "outfits.h"
 
 FeatureState g_feat = {0};
 
@@ -140,8 +141,12 @@ static void take_all_weapons(void);
 static void self_kill(void);
 static void clean_player(void);
 static void outfit_page(void);
+static void custom_outfit_page(void);
+static void beard_page(void);
 static void equip_wittemore_blue(void);
 static void equip_wittemore_red(void);
+static void apply_custom_outfit(void);
+static void clean_shave(void);
 static void bonding_max(void);
 static void horse_shop(void);
 static void money_page(void);
@@ -609,6 +614,97 @@ static void outfit_page(void) {
   ui_title("Outfits");
   ui_action("The Wittemore (High Honor)", equip_wittemore_blue);
   ui_action("The Wittemore (Low Honor)",  equip_wittemore_red);
+  ui_submenu("Custom Clothing", custom_outfit_page);
+  ui_submenu("Beard & Face Hair", beard_page);
+}
+
+static int s_custom_idx[NOUTFIT_CATS];
+static int s_beard_idx[NOUTFIT_BEARDS];
+static void wear_component(int ped, uint32_t hash, int category) {
+  nat_call(g_base, OFF_REMOVE_SHOP_ITEM_FROM_PED_BY_CATEGORY,
+           (uint64_t[]){(uint32_t)ped, category, 0, 0}, 4);
+  nat_call(g_base, OFF__APPLY_SHOP_ITEM_TO_PED, (uint64_t[]){(uint32_t)ped, hash, 1, 0, 0}, 5);
+}
+
+static void refresh_clothing(int ped) {
+  nat_call(g_base, OFF__UPDATE_PED_VARIATION, (uint64_t[]){(uint32_t)ped, 0, 1, 1, 1, 0}, 6);
+  nat_call(g_base, OFF__SET_ACTIVE_META_PED_COMPONENTS_UPDATED, (uint64_t[]){(uint32_t)ped, 0}, 2);
+}
+
+static void apply_custom_category(int id) {
+  if (id < 0 || id >= (int)NOUTFIT_CATS) return;
+  int ped = cur_ped(); if (!ped) return;
+  const OutfitCategory *c = &OUTFIT_CATS[id];
+  if (c->n <= 0) return;
+  nat_call(g_base, OFF__REFRESH_META_PED_SHOP_ITEMS, (uint64_t[]){(uint32_t)ped, 1}, 2);
+  wear_component(ped, c->hash[s_custom_idx[id]], c->category);
+  refresh_clothing(ped);
+  ui_notify("clothing applied");
+}
+
+static void apply_beard_category(int id) {
+  if (id < 0 || id >= (int)NOUTFIT_BEARDS) return;
+  int ped = cur_ped(); if (!ped) return;
+  const OutfitCategory *c = &OUTFIT_BEARDS[id];
+  if (c->n <= 0) return;
+  nat_call(g_base, OFF__REFRESH_META_PED_SHOP_ITEMS, (uint64_t[]){(uint32_t)ped, 1}, 2);
+  wear_component(ped, c->hash[s_beard_idx[id]], c->category);
+  refresh_clothing(ped);
+  ui_notify("facial hair applied");
+}
+
+static void apply_custom_outfit(void) {
+  int ped = cur_ped(); if (!ped) return;
+  nat_call(g_base, OFF__REFRESH_META_PED_SHOP_ITEMS, (uint64_t[]){(uint32_t)ped, 1}, 2);
+  for (unsigned i = 0; i < NOUTFIT_CATS; i++) {
+    const OutfitCategory *c = &OUTFIT_CATS[i];
+    if (c->n > 0) wear_component(ped, c->hash[s_custom_idx[i]], c->category);
+  }
+  nat_call(g_base, OFF__UPDATE_PED_VARIATION, (uint64_t[]){(uint32_t)ped, 0, 1, 1, 1, 0}, 6);
+  nat_call(g_base, OFF__SET_ACTIVE_META_PED_COMPONENTS_UPDATED, (uint64_t[]){(uint32_t)ped, 0}, 2);
+  ui_notify("custom clothing applied");
+}
+
+static void custom_outfit_page(void) {
+  ui_title("Custom Clothing");
+  for (unsigned i = 0; i < NOUTFIT_CATS; i++) {
+    const OutfitCategory *c = &OUTFIT_CATS[i];
+    ui_scroll_opt_apply(c->label, &s_custom_idx[i], c->names, c->n,
+                        apply_custom_category, (int)i);
+  }
+  ui_action("Apply All Clothing", apply_custom_outfit);
+}
+
+static void apply_beards(void) {
+  int ped = cur_ped(); if (!ped) return;
+  nat_call(g_base, OFF__REFRESH_META_PED_SHOP_ITEMS, (uint64_t[]){(uint32_t)ped, 1}, 2);
+  for (unsigned i = 0; i < NOUTFIT_BEARDS; i++) {
+    const OutfitCategory *c = &OUTFIT_BEARDS[i];
+    if (c->n > 0) wear_component(ped, c->hash[s_beard_idx[i]], c->category);
+  }
+  nat_call(g_base, OFF__UPDATE_PED_VARIATION, (uint64_t[]){(uint32_t)ped, 0, 1, 1, 1, 0}, 6);
+  nat_call(g_base, OFF__SET_ACTIVE_META_PED_COMPONENTS_UPDATED, (uint64_t[]){(uint32_t)ped, 0}, 2);
+  ui_notify("facial hair applied");
+}
+
+static void clean_shave(void) {
+  int ped = cur_ped(); if (!ped) return;
+  for (unsigned i = 0; i < NOUTFIT_BEARDS; i++)
+    nat_call(g_base, OFF_REMOVE_SHOP_ITEM_FROM_PED_BY_CATEGORY,
+             (uint64_t[]){(uint32_t)ped, OUTFIT_BEARDS[i].category, 0, 0}, 4);
+  nat_call(g_base, OFF__UPDATE_PED_VARIATION, (uint64_t[]){(uint32_t)ped, 0, 1, 1, 1, 0}, 6);
+  ui_notify("clean shave");
+}
+
+static void beard_page(void) {
+  ui_title("Beard & Face Hair");
+  for (unsigned i = 0; i < NOUTFIT_BEARDS; i++) {
+    const OutfitCategory *c = &OUTFIT_BEARDS[i];
+    ui_scroll_opt_apply(c->label, &s_beard_idx[i], c->names, c->n,
+                        apply_beard_category, (int)i);
+  }
+  ui_action("Apply All Facial Hair", apply_beards);
+  ui_action("Clean Shave", clean_shave);
 }
 
 static void equip_wittemore(const uint32_t *comps) {

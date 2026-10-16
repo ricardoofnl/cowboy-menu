@@ -217,6 +217,10 @@ void ui_scroll_int(const char *label, int *val, int lo, int hi, int step) {
 void ui_scroll_opt(const char *label, int *idx, const char *const *opts, int count) {
   (void)label; (void)idx; (void)opts; (void)count;
 }
+void ui_scroll_opt_apply(const char *label, int *idx, const char *const *opts, int count,
+                         void (*apply)(int), int id) {
+  (void)label; (void)idx; (void)opts; (void)count; (void)apply; (void)id;
+}
 void ui_notify(const char *msg) { (void)msg; }
 
 // config stubs - persistence is file-based on console, no-op in tests
