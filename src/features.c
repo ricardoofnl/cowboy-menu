@@ -710,9 +710,14 @@ static void beard_page(void) {
 static void equip_wittemore(const uint32_t *comps) {
   int ped = cur_ped(); if (!ped) return;
   nat_call(g_base, OFF__REFRESH_META_PED_SHOP_ITEMS, (uint64_t[]){(uint32_t)ped, 1}, 2);
-  // suspenders clip through the wittemore coat; remove old category before applying suit
+  // remove the active item and category; the category call alone can leave a player
+  // suspenders component cached until the next variation rebuild.
+  for (unsigned i = 0; i < sizeof(OF_SUSPENDERS) / sizeof(OF_SUSPENDERS[0]); i++)
+    nat_call(g_base, OFF__REMOVE_SHOP_ITEM_FROM_PED,
+             (uint64_t[]){(uint32_t)ped, OF_SUSPENDERS[i], 0, 0}, 4);
   nat_call(g_base, OFF_REMOVE_SHOP_ITEM_FROM_PED_BY_CATEGORY,
            (uint64_t[]){(uint32_t)ped, HASH_SUSPENDERS, 0, 0}, 4);
+  nat_call(g_base, OFF__UPDATE_PED_VARIATION, (uint64_t[]){(uint32_t)ped, 0, 1, 1, 1, 0}, 6);
   for (unsigned i = 0; i < NWITTEMORE; i++)
     nat_call(g_base, OFF__APPLY_SHOP_ITEM_TO_PED, (uint64_t[]){(uint32_t)ped, comps[i], 1, 0, 0}, 5);
   nat_call(g_base, OFF__UPDATE_PED_VARIATION, (uint64_t[]){(uint32_t)ped, 0, 1, 1, 1, 0}, 6);
