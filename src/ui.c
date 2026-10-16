@@ -276,7 +276,7 @@ static void ui_draw(void) {
     ui_draw_rect(MX + dx, helpY + 0.027f, MW, 0.054f, 18, 14, 10, 235);
     ui_draw_text(scroller ? "D-pad Left / Right: change" : "D-pad Up / Down: navigate",
                  textL + dx, helpY + 0.003f, 16, "body", "E8D9B8", "LEFT");
-    ui_draw_text(scroller ? "X: next value    O: back" : "X: select    O: back",
+    ui_draw_text(scroller ? (selected->apply ? "X: apply    O: back" : "X: next value    O: back") : "X: select    O: back",
                  textL + dx, helpY + 0.026f, 16, "body", "E8D9B8", "LEFT");
 
     // toast at the bottom-center (toggles + action messages via ui_notify)
@@ -350,7 +350,7 @@ void ui_tick(void) {
             ui_sound("NAV_LEFT");
         } else if (it->kind == UI_SCROLL_OPT && it->state && it->nopts > 0) {
             *it->state = (*it->state + (right ? 1 : -1) + it->nopts) % it->nopts;
-            if (it->apply) it->apply(it->apply_id);
+            // option changes stay local until X confirms the selection
             ui_sound("NAV_LEFT");
         }
     }
@@ -384,8 +384,12 @@ void ui_tick(void) {
             ui_sound("SELECT");
         } else if (it->kind == UI_SCROLL_OPT) {
             if (it->state && it->nopts > 0) {
-                *it->state = (*it->state + 1) % it->nopts;
-                if (it->apply) it->apply(it->apply_id);
+                if (it->apply) {
+                    // apply-select rows use X as confirm; left/right only previews
+                    it->apply(it->apply_id);
+                } else {
+                    *it->state = (*it->state + 1) % it->nopts;
+                }
             }
             ui_sound("SELECT");
         }
