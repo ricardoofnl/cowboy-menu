@@ -26,6 +26,7 @@ int main(void) {
     // set some state, save, wipe, load -> roundtrip
     g_feat.god = 1; g_feat.unlimited_deadeye = 1; g_feat.horse_god = 1;
     g_feat.never_wanted = 1; g_feat.freeze_time = 1;
+    g_feat.wittemore_variant = 2;
     g_cfg_money_idx = 5; g_cfg_weather_idx = 11; g_cfg_hour = 3; g_cfg_minute = 45;
     config_save();
 
@@ -35,6 +36,7 @@ int main(void) {
 
     assert(g_feat.god && g_feat.unlimited_deadeye && g_feat.horse_god);
     assert(g_feat.never_wanted && g_feat.freeze_time);
+    assert(g_feat.wittemore_variant == 2);
     assert(!g_feat.no_satchel && !g_feat.infinite_ammo);   // untouched stay off
     assert(g_cfg_money_idx == 5 && g_cfg_weather_idx == 11);
     assert(g_cfg_hour == 3 && g_cfg_minute == 45);

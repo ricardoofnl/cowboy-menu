@@ -11,6 +11,8 @@ typedef struct {
   int horse_unlimited_stamina, horse_god, horse_invisible, horse_super_run;
   // world
   int freeze_time;
+  // outfit state: 0=off, 1=high honor, 2=low honor
+  int wittemore_variant;
 } FeatureState;
 
 extern FeatureState g_feat;

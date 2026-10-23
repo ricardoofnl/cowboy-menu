@@ -26,7 +26,7 @@ static const char *const FIELD[] = {
 static int *field_ptr(int i) {
     // FeatureState is a flat run of ints in declaration order - index into it
     // ponytail: a table of &g_feat.x would be safer against reordering; revisit if fields split
-    _Static_assert(sizeof(FeatureState) / sizeof(int) >= 22, "field table out of sync");
+    _Static_assert(sizeof(FeatureState) / sizeof(int) >= 23, "field table out of sync");
     return &g_feat.god + i;
 }
 
@@ -40,6 +40,7 @@ void config_load(void) {
         for (unsigned i = 0; i < NFIELDS; i++) {
             if (!strcmp(key, FIELD[i])) { *field_ptr((int)i) = v != 0; goto next; }
         }
+        if (!strcmp(key, "wittemore_variant")) g_feat.wittemore_variant = v;
         if (!strcmp(key, "money_idx"))    g_cfg_money_idx = v;
         if (!strcmp(key, "weather_idx"))  g_cfg_weather_idx = v;
         if (!strcmp(key, "hour"))         g_cfg_hour = v;
@@ -54,8 +55,9 @@ void config_save(void) {
     if (!f) { ui_notify("save failed (no write access)"); return; }
     for (unsigned i = 0; i < NFIELDS; i++)
         fprintf(f, "%s=%d\n", FIELD[i], *field_ptr((int)i) ? 1 : 0);
-    fprintf(f, "money_idx=%d\nweather_idx=%d\nhour=%d\nminute=%d\n",
-            g_cfg_money_idx, g_cfg_weather_idx, g_cfg_hour, g_cfg_minute);
+    fprintf(f, "wittemore_variant=%d\nmoney_idx=%d\nweather_idx=%d\nhour=%d\nminute=%d\n",
+            g_feat.wittemore_variant, g_cfg_money_idx, g_cfg_weather_idx,
+            g_cfg_hour, g_cfg_minute);
     fclose(f);
     ui_notify("config saved");
 }
